@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\DirectoryServices.Contracts\DirectoryServices.Contracts.csproj" />
+    <ProjectReference Include="..\DirectoryServices.Entities\DirectoryServices.Entities.csproj" />
+  </ItemGroup>
+
+</Project>
