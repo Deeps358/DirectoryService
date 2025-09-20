@@ -11,10 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DirectoryServices.Contracts\DirectoryServices.Contracts.csproj" />
     <ProjectReference Include="..\DirectoryServices.Application\DirectoryServices.Application.csproj" />
-    <ProjectReference Include="..\DirectoryServices.Entities\DirectoryServices.Entities.csproj" />
-    <ProjectReference Include="..\DirectoryServices.Infrastructure\DirectoryServices.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
