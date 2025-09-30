@@ -7,8 +7,8 @@ namespace DirectoryServices.Entities
     public partial class Departament
     {
         private readonly List<Departament> _childrens = [];
-        private readonly List<Location> _locations = [];
-        private readonly List<Position> _positions = [];
+        private readonly List<DepartmentLocation> _locations = [];
+        private readonly List<DepartmentPosition> _positions = [];
 
         private Departament(
             DepName name,
@@ -16,8 +16,8 @@ namespace DirectoryServices.Entities
             DepPath path,
             Departament? parent,
             short depth,
-            IEnumerable<Location> locations,
-            IEnumerable<Position> positions,
+            IEnumerable<DepartmentLocation> locations,
+            IEnumerable<DepartmentPosition> positions,
             bool isActive)
         {
             Id = Guid.NewGuid();
@@ -47,9 +47,9 @@ namespace DirectoryServices.Entities
 
         public short Depth { get; private set; }
 
-        public IReadOnlyList<Location> Locations => _locations;
+        public IReadOnlyList<DepartmentLocation> Locations => _locations;
 
-        public IReadOnlyList<Position> Positions => _positions;
+        public IReadOnlyList<DepartmentPosition> Positions => _positions;
 
         public bool IsActive { get; private set; }
 
@@ -62,8 +62,8 @@ namespace DirectoryServices.Entities
             DepIdentifier identifier,
             DepPath path,
             Departament? parent,
-            IEnumerable<Location> locations,
-            IEnumerable<Position> positions,
+            IEnumerable<DepartmentLocation> locations,
+            IEnumerable<DepartmentPosition> positions,
             bool isActive)
         {
             // логика записи глубины отдела
@@ -107,7 +107,7 @@ namespace DirectoryServices.Entities
             return Result.Success(this);
         }
 
-        public Result<Departament> AddLocations(IEnumerable<Location> locations)
+        public Result<Departament> AddLocations(IEnumerable<DepartmentLocation> locations)
         {
             // проверка списка локаций
             if (locations == null || !locations.Any())
@@ -121,7 +121,7 @@ namespace DirectoryServices.Entities
             return Result.Success(this);
         }
 
-        public Result<Departament> AddPositions(IEnumerable<Position> positions)
+        public Result<Departament> AddPositions(IEnumerable<DepartmentPosition> positions)
         {
             // проверка списка позиций
             if (positions == null || !positions.Any())
