@@ -1,28 +1,30 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Positions
 {
-    public partial class Position
+    public record PosName
     {
-        public record PosName
+        public PosName()
         {
-            private PosName(string value)
+            // чтоб ефкор не ругался
+        }
+
+        private PosName(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; } = null!;
+
+        public static Result<PosName> Create(string name)
+        {
+            // валидация имени
+            if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
             {
-                Value = value;
+                return Result.Failure<PosName>("Название отдела должно быть 3-150 символов!");
             }
 
-            public string Value { get; }
-
-            public static Result<PosName> Create(string name)
-            {
-                // валидация имени
-                if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
-                {
-                    return Result.Failure<PosName>("Название отдела должно быть 3-150 символов!");
-                }
-
-                return new PosName(name);
-            }
+            return new PosName(name);
         }
     }
 }

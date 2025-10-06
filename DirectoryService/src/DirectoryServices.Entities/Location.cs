@@ -1,11 +1,17 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.ValueObjects.Locations;
 
 namespace DirectoryServices.Entities
 {
     public partial class Location
     {
+        public Location()
+        {
+            // efcore не ругайся
+        }
+
         private Location(
-            Guid id,
+            LocId id,
             LocName name,
             LocAdress adress,
             LocTimezone timezone,
@@ -20,13 +26,13 @@ namespace DirectoryServices.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Guid Id { get; private set; }
+        public LocId Id { get; private set; } = null!;
 
-        public LocName Name { get; private set; }
+        public LocName Name { get; private set; } = null!;
 
-        public LocAdress Adress { get; private set; }
+        public LocAdress Adress { get; private set; } = null!;
 
-        public LocTimezone Timezone { get; private set; }
+        public LocTimezone Timezone { get; private set; } = null!;
 
         public bool IsActive { get; private set; }
 
@@ -40,7 +46,8 @@ namespace DirectoryServices.Entities
             LocTimezone timezone,
             bool isActive)
         {
-            var location = new Location(Guid.NewGuid(), name, adress, timezone, isActive);
+            var locId = LocId.NewLocId();
+            var location = new Location(locId, name, adress, timezone, isActive);
 
             return Result.Success(location);
         }

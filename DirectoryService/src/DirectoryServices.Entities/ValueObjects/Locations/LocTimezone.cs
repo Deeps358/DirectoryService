@@ -1,37 +1,39 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Locations
 {
-    public partial class Location
+    public record LocTimezone
     {
-        public record LocTimezone
+        public LocTimezone()
         {
-            private LocTimezone(string value)
+            // чтоб ефкор не ругался
+        }
+
+        private LocTimezone(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; } = null!;
+
+        public static Result<LocTimezone> Create(string timezone)
+        {
+            // валидация зоны
+            if (string.IsNullOrWhiteSpace(timezone))
             {
-                Value = value;
+                return Result.Failure<LocTimezone>("Название временной зоны должно быть!");
             }
 
-            public string Value { get; }
-
-            public static Result<LocTimezone> Create(string timezone)
+            try
             {
-                // валидация зоны
-                if (string.IsNullOrWhiteSpace(timezone))
-                {
-                    return Result.Failure<LocTimezone>("Название временной зоны должно быть!");
-                }
-
-                try
-                {
-                    var someTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timezone);
-                }
-                catch (TimeZoneNotFoundException)
-                {
-                    return Result.Failure<LocTimezone>("Название временной зоны введено некорректно!");
-                }
-
-                return new LocTimezone(timezone);
+                var someTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timezone);
             }
+            catch (TimeZoneNotFoundException)
+            {
+                return Result.Failure<LocTimezone>("Название временной зоны введено некорректно!");
+            }
+
+            return new LocTimezone(timezone);
         }
     }
 }

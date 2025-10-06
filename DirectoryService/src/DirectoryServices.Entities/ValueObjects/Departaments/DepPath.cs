@@ -1,29 +1,30 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Departaments
 {
-
-    public partial class Departament
+    public record DepPath
     {
-        public record DepPath
+        public DepPath()
         {
-            private DepPath(string value)
-            {
-                Value = value;
-            }
+            // чтоб ефкор не ругался
+        }
 
-            public string Value { get; }
+        private DepPath(string value)
+        {
+            Value = value;
+        }
 
-            public static Result<DepPath> Create(Departament dep, DepIdentifier identifier)
-            {
-                // логика формирования пути отдела
-                string path =
-                    dep != null
-                    ? $"{dep.Path.Value}.{identifier.Value}"
-                    : $"{identifier.Value}";
+        public string Value { get; } = null!;
 
-                return new DepPath(path);
-            }
+        public static Result<DepPath> Create(string depPath, DepIdentifier identifier)
+        {
+            // логика формирования пути отдела
+            string path =
+                depPath != null
+                ? $"{depPath}.{identifier.Value}"
+                : $"{identifier.Value}";
+
+            return new DepPath(path);
         }
     }
 }

@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36D591C7-65C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Application", "src\DirectoryServices.Application\DirectoryServices.Application.csproj", "{F8E95EA4-0219-44A9-A63F-303AA06ECE8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Infrastructure", "src\DirectoryServices.Infrastructure\DirectoryServices.Infrastructure.csproj", "{25393F2C-E110-49C4-8CDE-6C3AF6F0AEA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Infrastructure.Postgres", "src\DirectoryServices.Infrastructure.Postgres\DirectoryServices.Infrastructure.Postgres.csproj", "{25393F2C-E110-49C4-8CDE-6C3AF6F0AEA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Web", "src\DirectoryServices.Web\DirectoryServices.Web.csproj", "{EF50C31C-EF87-450C-AFD3-DBCF92C535A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryService.Presenters", "src\DirectoryService.Presenters\DirectoryService.Presenters.csproj", "{36308B6E-7CAA-4A17-B1E4-64AAF46A4F85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Presenters", "src\DirectoryServices.Presenters\DirectoryServices.Presenters.csproj", "{36308B6E-7CAA-4A17-B1E4-64AAF46A4F85}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{0F45D28F-0126-4150-A6AA-D28B243539E1}"
 	ProjectSection(SolutionItems) = preProject

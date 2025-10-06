@@ -1,33 +1,35 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Positions
 {
-    public partial class Position
+    public record PosDescription
     {
-        public record PosDescription
+        public PosDescription()
         {
-            private PosDescription(string value)
+            // чтоб ефкор не ругался
+        }
+
+        private PosDescription(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; } = null!;
+
+        public static Result<PosDescription> Create(string? description)
+        {
+            if (description == null)
             {
-                Value = value;
+                return null;
             }
 
-            public string Value { get; }
-
-            public static Result<PosDescription> Create(string? description)
+            // валидация описания
+            if (description.Length > 1000)
             {
-                if (description == null)
-                {
-                    return null;
-                }
-
-                // валидация описания
-                if (description.Length > 1000)
-                {
-                    return Result.Failure<PosDescription>("Описание позиции должно быть 1-1000 символов!");
-                }
-
-                return new PosDescription(description);
+                return Result.Failure<PosDescription>("Описание позиции должно быть 1-1000 символов!");
             }
+
+            return new PosDescription(description);
         }
     }
 }

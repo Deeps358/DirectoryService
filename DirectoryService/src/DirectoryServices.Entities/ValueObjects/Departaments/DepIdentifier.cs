@@ -1,34 +1,36 @@
 ﻿using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Departaments
 {
-    public partial class Departament
+    public record DepIdentifier
     {
-        public record DepIdentifier
+        private DepIdentifier()
         {
-            private DepIdentifier(string value)
+            // чтоб ефкор не ругался
+        }
+
+        private DepIdentifier(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; } = null!;
+
+        public static Result<DepIdentifier> Create(string identifier)
+        {
+            // валидация идентификатора
+            if (string.IsNullOrWhiteSpace(identifier) || identifier.Length < 2 || identifier.Length > 10)
             {
-                Value = value;
+                return Result.Failure<DepIdentifier>("Идентификатор отдела должно быть 2-10 символов!");
             }
 
-            public string Value { get; }
-
-            public static Result<DepIdentifier> Create(string identifier)
+            if (!Regex.IsMatch(identifier, @"^[a-z\-]+$"))
             {
-                // валидация идентификатора
-                if (string.IsNullOrWhiteSpace(identifier) || identifier.Length < 2 || identifier.Length > 10)
-                {
-                    return Result.Failure<DepIdentifier>("Идентификатор отдела должно быть 2-10 символов!");
-                }
-
-                if (!Regex.IsMatch(identifier, @"^[a-z\-]+$"))
-                {
-                    return Result.Failure<DepIdentifier>("В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
-                }
-
-                return new DepIdentifier(identifier);
+                return Result.Failure<DepIdentifier>("В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
             }
+
+            return new DepIdentifier(identifier);
         }
     }
 }

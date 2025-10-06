@@ -1,28 +1,38 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace DirectoryServices.Entities
+namespace DirectoryServices.Entities.ValueObjects.Locations
 {
-    public partial class Location
+    public record LocAdress
     {
-        public record LocAdress
+        public LocAdress()
         {
-            private LocAdress(string[] value)
+            // чтоб ефкор не ругался
+        }
+
+        private LocAdress(string city, string street)
+        {
+            City = city;
+            Street = street;
+        }
+
+        public string City { get; } = null!;
+
+        public string Street { get; } = null!;
+
+        public static Result<LocAdress> Create(string city, string street)
+        {
+            // валидация имени
+            if (string.IsNullOrWhiteSpace(city))
             {
-                Value = value;
+                return Result.Failure<LocAdress>("Название города пустое");
             }
 
-            public string[] Value { get; }
-
-            public static Result<LocAdress> Create(string[] name)
+            if (string.IsNullOrWhiteSpace(street))
             {
-                // валидация имени
-                if (!name.Any())
-                {
-                    return Result.Failure<LocAdress>("В адресе надо хоть что-то указать!");
-                }
-
-                return new LocAdress(name);
+                return Result.Failure<LocAdress>("Название улицы пустое");
             }
+
+            return new LocAdress(city, street);
         }
     }
 }
