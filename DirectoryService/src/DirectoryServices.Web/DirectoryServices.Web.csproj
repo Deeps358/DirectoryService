@@ -8,15 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DirectoryService.Presenters\DirectoryService.Presenters.csproj" />
     <ProjectReference Include="..\DirectoryServices.Application\DirectoryServices.Application.csproj" />
     <ProjectReference Include="..\DirectoryServices.Contracts\DirectoryServices.Contracts.csproj" />
     <ProjectReference Include="..\DirectoryServices.Entities\DirectoryServices.Entities.csproj" />
-    <ProjectReference Include="..\DirectoryServices.Infrastructure\DirectoryServices.Infrastructure.csproj" />
+    <ProjectReference Include="..\DirectoryServices.Infrastructure.Postgres\DirectoryServices.Infrastructure.Postgres.csproj" />
+    <ProjectReference Include="..\DirectoryServices.Presenters\DirectoryServices.Presenters.csproj" />
   </ItemGroup>
 
 </Project>

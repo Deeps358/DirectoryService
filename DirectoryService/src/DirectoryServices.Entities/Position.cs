@@ -1,11 +1,17 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.ValueObjects.Positions;
 
 namespace DirectoryServices.Entities
 {
     public partial class Position
     {
+        public Position()
+        {
+            // efcore не ругайся
+        }
+
         private Position(
-            Guid id,
+            PosId id,
             PosName name,
             PosDescription? description,
             bool isActive)
@@ -18,9 +24,9 @@ namespace DirectoryServices.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Guid Id { get; private set; }
+        public PosId Id { get; private set; } = null!;
 
-        public PosName Name { get; private set; }
+        public PosName Name { get; private set; } = null!;
 
         public PosDescription? Description { get; private set; }
 
@@ -32,7 +38,8 @@ namespace DirectoryServices.Entities
 
         public static Result<Position> Create(PosName name, PosDescription? description, bool isActive)
         {
-            var position = new Position(Guid.NewGuid(), name, description, isActive);
+            var posId = PosId.NewPosId();
+            var position = new Position(posId, name, description, isActive);
 
             return Result.Success(position);
         }

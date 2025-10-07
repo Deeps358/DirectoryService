@@ -1,32 +1,43 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.ValueObjects.Departaments;
+using DirectoryServices.Entities.ValueObjects.Positions;
 
 namespace DirectoryServices.Entities
 {
     public class DepartmentPosition
     {
-        private DepartmentPosition(
-            Guid depId,
-            Guid posId)
+        public DepartmentPosition()
         {
+            // чтоб ефкор не ругался
+        }
+
+        private DepartmentPosition(
+            Guid id,
+            DepId depId,
+            PosId posId)
+        {
+            Id = id;
             DepartamentId = depId;
             PositionId = posId;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Guid DepartamentId { get; private set; }
+        public Guid Id { get; private set; }
 
-        public Guid PositionId { get; private set; }
+        public DepId DepartamentId { get; private set; } = null!;
+
+        public PosId PositionId { get; private set; } = null!;
 
         public DateTime CreatedAt { get; private set; }
 
         public DateTime UpdatedAt { get; private set; }
 
         public static Result<DepartmentPosition> Create(
-            Guid depId,
-            Guid posId)
+            DepId depId,
+            PosId posId)
         {
-            var depPos = new DepartmentPosition(depId, posId);
+            var depPos = new DepartmentPosition(Guid.NewGuid(), depId, posId);
 
             return Result.Success(depPos);
         }

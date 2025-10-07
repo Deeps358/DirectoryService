@@ -1,14 +1,20 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.ValueObjects.Departaments;
 using System.Text.RegularExpressions;
+using static DirectoryServices.Entities.Departament;
 
 namespace DirectoryServices.Entities
 {
-
     public partial class Departament
     {
         private readonly List<Departament> _childrens = [];
         private readonly List<DepartmentLocation> _locations = [];
         private readonly List<DepartmentPosition> _positions = [];
+
+        private Departament()
+        {
+            // чтоб ефкор не ругался
+        }
 
         private Departament(
             DepName name,
@@ -20,7 +26,7 @@ namespace DirectoryServices.Entities
             IEnumerable<DepartmentPosition> positions,
             bool isActive)
         {
-            Id = Guid.NewGuid();
+            Id = DepId.NewDepId();
             Name = name;
             Identifier = identifier;
             Path = path;
@@ -33,17 +39,19 @@ namespace DirectoryServices.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public Guid Id { get; private set; }
+        public DepId Id { get; private set; } = null!;
 
-        public DepName Name { get; private set; }
+        public DepName Name { get; private set; } = default!;
 
-        public DepIdentifier Identifier { get; private set; }
+        public DepIdentifier Identifier { get; private set; } = default!;
+
+        public DepId? ParentId { get; private set; }
 
         public Departament? Parent { get; private set; }
 
         public IReadOnlyList<Departament> Childrens => _childrens;
 
-        public DepPath Path { get; private set; }
+        public DepPath Path { get; private set; } = default!;
 
         public short Depth { get; private set; }
 

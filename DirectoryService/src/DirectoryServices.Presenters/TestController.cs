@@ -1,11 +1,14 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
+using DirectoryServices.Entities.ValueObjects.Locations;
+using DirectoryServices.Entities.ValueObjects.Positions;
 using Microsoft.AspNetCore.Mvc;
 using static DirectoryServices.Entities.Departament;
 using static DirectoryServices.Entities.Location;
 using static DirectoryServices.Entities.Position;
 
-namespace DirectoryService.Presenters
+namespace DirectoryServices.Presenters
 {
     [ApiController]
     [Route("[controller]")]
@@ -42,7 +45,7 @@ namespace DirectoryService.Presenters
             // тут будет взятие списка локаций по id
             // тут будет взятие списка позиций по id
 
-            Result<Departament> depResult = Departament.Create(
+            Result<Departament> depResult = Create(
                 newDepName.Value,
                 newDepIdentifier.Value,
                 newDepPath.Value,
@@ -62,7 +65,8 @@ namespace DirectoryService.Presenters
         [HttpPost("CreateLocation")]
         public IActionResult CreateLocation(
             string name,
-            [FromRoute]string[] adress,
+            string city,
+            string street,
             string timezone,
             bool isActive)
         {
@@ -72,7 +76,7 @@ namespace DirectoryService.Presenters
                 return BadRequest(newLocName.Error);
             }
 
-            var newLocAdress = LocAdress.Create(adress);
+            var newLocAdress = LocAdress.Create(city, street);
             if (newLocAdress.IsFailure)
             {
                 return BadRequest(newLocAdress.Error);
@@ -84,7 +88,7 @@ namespace DirectoryService.Presenters
                 return BadRequest(newTimeZone.Error);
             }
 
-            Result<Location> locResult = Location.Create(
+            Result<Location> locResult = Create(
                 newLocName.Value,
                 newLocAdress.Value,
                 newTimeZone.Value,
@@ -116,7 +120,7 @@ namespace DirectoryService.Presenters
                 return BadRequest(newPosDescr.Error);
             }
 
-            Result<Position> posResult = Position.Create(
+            Result<Position> posResult = Create(
                 newPosName.Value,
                 newPosDescr.Value,
                 isActive);
