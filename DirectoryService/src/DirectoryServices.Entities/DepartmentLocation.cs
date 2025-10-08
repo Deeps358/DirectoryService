@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using DirectoryServices.Entities.ValueObjects.Locations;
 
@@ -39,7 +39,7 @@ namespace DirectoryServices.Entities
         {
             var depLoc = new DepartmentLocation(Guid.NewGuid(), depId, locId);
 
-            return Result.Success(depLoc);
+            return depLoc;
         }
     }
 }

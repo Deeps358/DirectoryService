@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Locations;
 
 namespace DirectoryServices.Entities
@@ -49,7 +50,7 @@ namespace DirectoryServices.Entities
             var locId = LocId.NewLocId();
             var location = new Location(locId, name, adress, timezone, isActive);
 
-            return Result.Success(location);
+            return location;
         }
     }
 }

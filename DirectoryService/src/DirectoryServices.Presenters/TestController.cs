@@ -1,12 +1,9 @@
-﻿using CSharpFunctionalExtensions;
-using DirectoryServices.Entities;
+﻿using DirectoryServices.Entities;
+using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using DirectoryServices.Entities.ValueObjects.Positions;
 using Microsoft.AspNetCore.Mvc;
-using static DirectoryServices.Entities.Departament;
-using static DirectoryServices.Entities.Location;
-using static DirectoryServices.Entities.Position;
 
 namespace DirectoryServices.Presenters
 {
@@ -45,7 +42,7 @@ namespace DirectoryServices.Presenters
             // тут будет взятие списка локаций по id
             // тут будет взятие списка позиций по id
 
-            Result<Departament> depResult = Create(
+            Result<Departament> depResult = Departament.Create(
                 newDepName.Value,
                 newDepIdentifier.Value,
                 newDepPath.Value,
@@ -88,7 +85,7 @@ namespace DirectoryServices.Presenters
                 return BadRequest(newTimeZone.Error);
             }
 
-            Result<Location> locResult = Create(
+            Result<Location> locResult = Location.Create(
                 newLocName.Value,
                 newLocAdress.Value,
                 newTimeZone.Value,
@@ -120,7 +117,7 @@ namespace DirectoryServices.Presenters
                 return BadRequest(newPosDescr.Error);
             }
 
-            Result<Position> posResult = Create(
+            Result<Position> posResult = Position.Create(
                 newPosName.Value,
                 newPosDescr.Value,
                 isActive);
