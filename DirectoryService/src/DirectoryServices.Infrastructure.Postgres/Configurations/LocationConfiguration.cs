@@ -38,6 +38,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_100)
                     .HasColumnName("street");
+
+                ab.Property(l => l.Building)
+                    .IsRequired()
+                    .HasColumnName("building");
+
+                ab.Property(l => l.Room)
+                    .IsRequired()
+                    .HasMaxLength(LengthConstants.LENGTH_100)
+                    .HasColumnName("room");
             });
 
             builder.OwnsOne(l => l.Timezone, tb =>

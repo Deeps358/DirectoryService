@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // валидация имени
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 120)
             {
-                return Result.Failure<LocName>("Название локации должно быть 3-120 символов!");
+                return "Название локации должно быть 3-120 символов!";
             }
 
             return new LocName(name);

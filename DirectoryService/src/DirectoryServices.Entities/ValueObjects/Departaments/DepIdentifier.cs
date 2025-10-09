@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
+using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Departaments
 {
@@ -22,12 +22,12 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
             // валидация идентификатора
             if (string.IsNullOrWhiteSpace(identifier) || identifier.Length < 2 || identifier.Length > 10)
             {
-                return Result.Failure<DepIdentifier>("Идентификатор отдела должно быть 2-10 символов!");
+                return "Идентификатор отдела должно быть 2-10 символов!";
             }
 
             if (!Regex.IsMatch(identifier, @"^[a-z\-]+$"))
             {
-                return Result.Failure<DepIdentifier>("В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
+                return "В идентификаторе допускаются только латиница в нижнем регистре и дефисы";
             }
 
             return new DepIdentifier(identifier);

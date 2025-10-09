@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // валидация зоны
             if (string.IsNullOrWhiteSpace(timezone))
             {
-                return Result.Failure<LocTimezone>("Название временной зоны должно быть!");
+                return "Название временной зоны должно быть!";
             }
 
             try
@@ -30,7 +30,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             }
             catch (TimeZoneNotFoundException)
             {
-                return Result.Failure<LocTimezone>("Название временной зоны введено некорректно!");
+                return "Название временной зоны введено некорректно!";
             }
 
             return new LocTimezone(timezone);

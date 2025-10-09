@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Departaments
 {
@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
             // валидация имени
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
             {
-                return Result.Failure<DepName>("Название отдела должно быть 3-150 символов!");
+                return "Название отдела должно быть 3-150 символов!";
             }
 
             return new DepName(name);

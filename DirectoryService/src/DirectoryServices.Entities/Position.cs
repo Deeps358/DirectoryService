@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using DirectoryServices.Entities.Shared;
+﻿using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Positions;
 
 namespace DirectoryServices.Entities
