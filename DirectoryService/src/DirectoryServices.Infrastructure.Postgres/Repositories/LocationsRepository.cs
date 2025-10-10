@@ -18,12 +18,21 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
         public async Task<Result<Location>> CreateAsync(Location location, CancellationToken cancellationToken)
         {
-            var addedLocation = await _dbContext.Locations.AddAsync(location, cancellationToken);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                var addedLocation = await _dbContext.Locations.AddAsync(location, cancellationToken);
+                await _dbContext.SaveChangesAsync();
 
-            _logger.LogInformation("Добавлена сущность локации с {addedLocation.Entity.Id.Value}", addedLocation.Entity.Id.Value);
+                _logger.LogInformation("Добавлена сущность локации с {addedLocation.Entity.Id.Value}", addedLocation.Entity.Id.Value);
 
-            return Result<Location>.Success(location);
+                return Result<Location>.Success(location);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"Ошибка при записи в БД: {ex.Message}");
+
+                return "Ошибка записи сущности Location в базу";
+            }
         }
     }
 }

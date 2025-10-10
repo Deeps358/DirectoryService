@@ -20,7 +20,7 @@ namespace DirectoryServices.Presenters
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLocation([FromBody] CreateLocationDTO createLocationDTO, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateLocation([FromBody] CreateLocationDto createLocationDTO, CancellationToken cancellationToken)
         {
             var location = await _locationsService.Create(createLocationDTO, cancellationToken);
 

@@ -1,6 +1,6 @@
 ﻿namespace DirectoryServices.Contracts.Locations
 {
-    public record AdressDTO(
+    public record AdressDto(
         string City,
         string Street,
         int Building,

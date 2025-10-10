@@ -10,7 +10,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // чтоб ефкор не ругался
         }
 
-        private LocAdress(AdressDTO adress)
+        private LocAdress(AdressDto adress)
         {
             City = adress.City;
             Street = adress.Street;
@@ -26,7 +26,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
 
         public string Room { get; } = null!;
 
-        public static Result<LocAdress> Create(AdressDTO adress)
+        public static Result<LocAdress> Create(AdressDto adress)
         {
             // валидация имени
             if (string.IsNullOrWhiteSpace(adress.City))

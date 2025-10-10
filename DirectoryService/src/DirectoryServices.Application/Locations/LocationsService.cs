@@ -17,7 +17,7 @@ namespace DirectoryServices.Application.Locations
             _logger = logger;
         }
 
-        public async Task<Result<Location>> Create(CreateLocationDTO location, CancellationToken cancellationToken)
+        public async Task<Result<Location>> Create(CreateLocationDto location, CancellationToken cancellationToken)
         {
             var newLocName = LocName.Create(location.Name);
             if (newLocName.IsFailure)
@@ -49,6 +49,12 @@ namespace DirectoryServices.Application.Locations
             }
 
             var newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
+
+            if (newLocation.IsFailure)
+            {
+                _logger.LogInformation($"Ошибка записи в базу: {newLocation.Error}");
+                return newLocation.Error!;
+            }
 
             _logger.LogInformation("Создана локация с id {newLocation.Value.Id.Value}", newLocation.Value.Id.Value);
 

@@ -1,8 +1,8 @@
 ﻿namespace DirectoryServices.Contracts.Locations
 {
-    public record CreateLocationDTO(
+    public record CreateLocationDto(
         string Name,
-        AdressDTO Adress,
+        AdressDto Adress,
         string Timezone,
         bool isActive);
 }
