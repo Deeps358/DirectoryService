@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Positions;
 
 namespace DirectoryServices.Entities
@@ -41,7 +41,7 @@ namespace DirectoryServices.Entities
             var posId = PosId.NewPosId();
             var position = new Position(posId, name, description, isActive);
 
-            return Result.Success(position);
+            return position;
         }
     }
 }

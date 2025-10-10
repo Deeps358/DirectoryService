@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Positions
 {
@@ -26,7 +26,7 @@ namespace DirectoryServices.Entities.ValueObjects.Positions
             // валидация описания
             if (description.Length > 1000)
             {
-                return Result.Failure<PosDescription>("Описание позиции должно быть 1-1000 символов!");
+                return "Описание позиции должно быть 1-1000 символов!";
             }
 
             return new PosDescription(description);

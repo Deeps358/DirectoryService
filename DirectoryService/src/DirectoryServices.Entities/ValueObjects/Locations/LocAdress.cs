@@ -1,4 +1,5 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Contracts.Locations;
+using DirectoryServices.Entities.Shared;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -9,30 +10,46 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // чтоб ефкор не ругался
         }
 
-        private LocAdress(string city, string street)
+        private LocAdress(AdressDto adress)
         {
-            City = city;
-            Street = street;
+            City = adress.City;
+            Street = adress.Street;
+            Building = adress.Building;
+            Room = adress.Room;
         }
 
         public string City { get; } = null!;
 
         public string Street { get; } = null!;
 
-        public static Result<LocAdress> Create(string city, string street)
+        public int Building { get; }
+
+        public string Room { get; } = null!;
+
+        public static Result<LocAdress> Create(AdressDto adress)
         {
             // валидация имени
-            if (string.IsNullOrWhiteSpace(city))
+            if (string.IsNullOrWhiteSpace(adress.City))
             {
-                return Result.Failure<LocAdress>("Название города пустое");
+                return "Название города пустое";
             }
 
-            if (string.IsNullOrWhiteSpace(street))
+            if (string.IsNullOrWhiteSpace(adress.Street))
             {
-                return Result.Failure<LocAdress>("Название улицы пустое");
+                return "Название улицы пустое";
             }
 
-            return new LocAdress(city, street);
+            if (adress.Building <= 0)
+            {
+                return "Странный номер здания";
+            }
+
+            if (string.IsNullOrWhiteSpace(adress.Room))
+            {
+                return "Номер комнаты пуст";
+            }
+
+            return new LocAdress(adress);
         }
     }
 }

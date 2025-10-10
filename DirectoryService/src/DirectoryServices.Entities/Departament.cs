@@ -1,7 +1,6 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using System.Text.RegularExpressions;
-using static DirectoryServices.Entities.Departament;
 
 namespace DirectoryServices.Entities
 {
@@ -80,20 +79,20 @@ namespace DirectoryServices.Entities
             // передача в конструктор
             var departament = new Departament(name, identifier, path, parent, depth, locations, positions, isActive);
 
-            return Result.Success(departament);
+            return departament;
         }
 
         public Result<Departament> Rename(DepName name)
         {
             if (string.IsNullOrWhiteSpace(name.Value) || name.Value.Length < 3 || name.Value.Length > 150)
             {
-                return Result.Failure<Departament>("Название отдела должно быть 3-150 символов!");
+                return "Название отдела должно быть 3-150 символов!"; // перегрузка оператора в Result
             }
 
             Name = name;
             UpdatedAt = DateTime.UtcNow;
 
-            return Result.Success(this);
+            return this;
         }
 
         public Result<Departament> ChangeIdentidier(DepIdentifier identifier)
@@ -101,18 +100,18 @@ namespace DirectoryServices.Entities
             // валидация идентификатора
             if (string.IsNullOrWhiteSpace(identifier.Value) || identifier.Value.Length < 2 || identifier.Value.Length > 10)
             {
-                return Result.Failure<Departament>("Идентификатор отдела должно быть 2-10 символов!");
+                return "Идентификатор отдела должно быть 2-10 символов!";
             }
 
             if (!Regex.IsMatch(identifier.Value, @"^[a-z\-]+$"))
             {
-                return Result.Failure<Departament>("В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
+                return "В идентификаторе допускаются только латиница в нижнем регистре и дефисы";
             }
 
             Identifier = identifier;
             UpdatedAt = DateTime.UtcNow;
 
-            return Result.Success(this);
+            return this;
         }
 
         public Result<Departament> AddLocations(IEnumerable<DepartmentLocation> locations)
@@ -120,13 +119,13 @@ namespace DirectoryServices.Entities
             // проверка списка локаций
             if (locations == null || !locations.Any())
             {
-                return Result.Failure<Departament>("Список локаций не должен быть пустым!");
+                return "Список локаций не должен быть пустым!";
             }
 
             _locations.Concat(locations);
             UpdatedAt = DateTime.UtcNow;
 
-            return Result.Success(this);
+            return this;
         }
 
         public Result<Departament> AddPositions(IEnumerable<DepartmentPosition> positions)
@@ -134,13 +133,13 @@ namespace DirectoryServices.Entities
             // проверка списка позиций
             if (positions == null || !positions.Any())
             {
-                return Result.Failure<Departament>("Список позиций не должен быть пустым!");
+                return "Список позиций не должен быть пустым!";
             }
 
             _positions.Concat(positions);
             UpdatedAt = DateTime.UtcNow;
 
-            return Result.Success(this);
+            return this;
         }
     }
 }

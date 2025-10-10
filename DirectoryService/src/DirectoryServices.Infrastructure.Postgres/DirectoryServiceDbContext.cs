@@ -1,5 +1,6 @@
 ﻿using DirectoryServices.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DirectoryServices.Infrastructure.Postgres
 {
@@ -15,12 +16,16 @@ namespace DirectoryServices.Infrastructure.Postgres
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(_connectionString);
+            optionsBuilder.UseLoggerFactory(CreateLoggerFactory()); // логирование в консольку
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DirectoryServiceDbContext).Assembly);
         }
+
+        private ILoggerFactory CreateLoggerFactory() =>
+            LoggerFactory.Create(builder => { builder.AddConsole(); });
 
         public DbSet<Departament> Departaments => Set<Departament>();
 

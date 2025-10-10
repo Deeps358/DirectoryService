@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using DirectoryServices.Entities.ValueObjects.Positions;
 
@@ -39,7 +39,7 @@ namespace DirectoryServices.Entities
         {
             var depPos = new DepartmentPosition(Guid.NewGuid(), depId, posId);
 
-            return Result.Success(depPos);
+            return depPos;
         }
     }
 }
