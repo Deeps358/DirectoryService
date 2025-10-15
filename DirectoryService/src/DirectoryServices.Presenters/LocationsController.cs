@@ -1,9 +1,6 @@
 ﻿using DirectoryServices.Application.Locations;
 using DirectoryServices.Contracts.Locations;
-using DirectoryServices.Entities;
-using DirectoryServices.Entities.Shared;
-using DirectoryServices.Entities.ValueObjects.Departaments;
-using DirectoryServices.Entities.ValueObjects.Positions;
+using DirectoryServices.Presenters.ResponseExtensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DirectoryServices.Presenters
@@ -26,7 +23,7 @@ namespace DirectoryServices.Presenters
 
             if(location.IsFailure)
             {
-                return BadRequest(location.Error);
+                return location.Error.ToErrorResponse();
             }
 
             return Ok(location);

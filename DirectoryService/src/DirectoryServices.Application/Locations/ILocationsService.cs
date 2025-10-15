@@ -1,6 +1,6 @@
 ﻿using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities;
-using DirectoryServices.Entities.Shared;
+using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Locations
 {

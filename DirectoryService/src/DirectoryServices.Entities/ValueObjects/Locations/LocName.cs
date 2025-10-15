@@ -1,4 +1,4 @@
-﻿using DirectoryServices.Entities.Shared;
+﻿using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // валидация имени
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 120)
             {
-                return "Название локации должно быть 3-120 символов!";
+                return GeneralErrors.IncorrectNameError("location");
             }
 
             return new LocName(name);

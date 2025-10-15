@@ -1,5 +1,5 @@
 ﻿using DirectoryServices.Contracts.Locations;
-using DirectoryServices.Entities.Shared;
+using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -31,22 +31,22 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // валидация имени
             if (string.IsNullOrWhiteSpace(adress.City))
             {
-                return "Название города пустое";
+                return Error.Validation("location.incorrect.city", "Название города пустое");
             }
 
             if (string.IsNullOrWhiteSpace(adress.Street))
             {
-                return "Название улицы пустое";
+                return Error.Validation("location.incorrect.street", "Название улицы пустое");
             }
 
             if (adress.Building <= 0)
             {
-                return "Странный номер здания";
+                return Error.Validation("location.incorrect.building", "Странный номер здания");
             }
 
             if (string.IsNullOrWhiteSpace(adress.Room))
             {
-                return "Номер комнаты пуст";
+                return Error.Validation("location.incorrect.room", "Номер комнаты пуст");
             }
 
             return new LocAdress(adress);

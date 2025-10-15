@@ -22,7 +22,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
             {
                 nb.Property(p => p.Value)
                     .IsRequired()
-                    .HasMaxLength(LengthConstants.LENGTH_100)
+                    .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("name");
             });
 

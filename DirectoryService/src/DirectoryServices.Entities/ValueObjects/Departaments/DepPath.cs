@@ -1,4 +1,4 @@
-﻿using DirectoryServices.Entities.Shared;
+﻿using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Departaments
 {
