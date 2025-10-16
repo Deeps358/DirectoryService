@@ -28,7 +28,7 @@ namespace Shared.ResultPattern
             InvalidField = invalidField;
         }
 
-        public static Error NotFound(string? code, string message, Guid? id)
+        public static Error NotFound(string? code, string message)
             => new(code ?? "record.not.found", message, ErrorType.NOT_FOUND);
 
         public static Error Validation(string? code, string message, string? invalidField = null)

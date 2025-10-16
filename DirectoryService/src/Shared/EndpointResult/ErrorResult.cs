@@ -1,17 +1,26 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Presenters.ResponseExtensions
+namespace Shared.EndpointResult
 {
-    public static class ResponseExtensions
+    public sealed class ErrorResult : IResult
     {
-        public static ActionResult ToErrorResponse(this Error error)
+        private readonly Error _error;
+
+        public ErrorResult(Error error)
         {
-            return new ObjectResult(error)
-            {
-                StatusCode = GetStatusCodeFromErrorType(error.Type),
-            };
+            _error = error;
+        }
+
+        public Task ExecuteAsync(HttpContext httpContext)
+        {
+            ArgumentNullException.ThrowIfNull(httpContext);
+
+            var envelope = Envelope.Fail(_error);
+
+            httpContext.Response.StatusCode = GetStatusCodeFromErrorType(_error.Type);
+
+            return httpContext.Response.WriteAsJsonAsync(envelope);
         }
 
         private static int GetStatusCodeFromErrorType(ErrorType errorType) =>

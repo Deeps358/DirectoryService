@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="Departaments\" />
+    <Folder Include="Positions\" />
   </ItemGroup>
 
 </Project>
