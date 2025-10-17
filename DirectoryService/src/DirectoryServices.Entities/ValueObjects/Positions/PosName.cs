@@ -1,4 +1,4 @@
-﻿using DirectoryServices.Entities.Shared;
+﻿using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Positions
 {
@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Positions
             // валидация имени
             if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
             {
-                return "Название отдела должно быть 3-150 символов!";
+                return GeneralErrors.IncorrectNameError("position");
             }
 
             return new PosName(name);

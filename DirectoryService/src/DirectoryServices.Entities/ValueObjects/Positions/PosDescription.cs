@@ -1,4 +1,4 @@
-﻿using DirectoryServices.Entities.Shared;
+﻿using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Positions
 {
@@ -26,7 +26,7 @@ namespace DirectoryServices.Entities.ValueObjects.Positions
             // валидация описания
             if (description.Length > 1000)
             {
-                return "Описание позиции должно быть 1-1000 символов!";
+                return Error.Validation("departament.incorrect.description", "Описание должно быть не более 1000 символов!");
             }
 
             return new PosDescription(description);

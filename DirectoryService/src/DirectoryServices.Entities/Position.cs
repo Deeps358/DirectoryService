@@ -1,5 +1,5 @@
-﻿using DirectoryServices.Entities.Shared;
-using DirectoryServices.Entities.ValueObjects.Positions;
+﻿using DirectoryServices.Entities.ValueObjects.Positions;
+using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities
 {

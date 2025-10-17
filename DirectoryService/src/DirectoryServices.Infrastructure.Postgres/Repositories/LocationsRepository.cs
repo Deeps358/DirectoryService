@@ -1,7 +1,7 @@
 ﻿using DirectoryServices.Application.Locations;
 using DirectoryServices.Entities;
-using DirectoryServices.Entities.Shared;
 using Microsoft.Extensions.Logging;
+using Shared.ResultPattern;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
 {
@@ -31,7 +31,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             {
                 _logger.LogInformation($"Ошибка при записи в БД: {ex.Message}");
 
-                return "Ошибка записи сущности Location в базу";
+                return Error.Failure("location.incorrect.DB", "Ошибка записи сущности Location в базу");
             }
         }
     }

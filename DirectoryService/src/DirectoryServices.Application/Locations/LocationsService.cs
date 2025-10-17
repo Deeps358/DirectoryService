@@ -1,8 +1,8 @@
 ﻿using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities;
-using DirectoryServices.Entities.Shared;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.Extensions.Logging;
+using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Locations
 {

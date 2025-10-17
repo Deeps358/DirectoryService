@@ -1,5 +1,5 @@
-﻿using DirectoryServices.Entities.Shared;
-using DirectoryServices.Entities.ValueObjects.Departaments;
+﻿using DirectoryServices.Entities.ValueObjects.Departaments;
+using Shared.ResultPattern;
 using System.Text.RegularExpressions;
 
 namespace DirectoryServices.Entities
@@ -86,7 +86,7 @@ namespace DirectoryServices.Entities
         {
             if (string.IsNullOrWhiteSpace(name.Value) || name.Value.Length < 3 || name.Value.Length > 150)
             {
-                return "Название отдела должно быть 3-150 символов!"; // перегрузка оператора в Result
+                return Error.Validation("departament.incorrect.name", "Название отдела должно быть 3-150 символов!"); // перегрузка оператора в Result
             }
 
             Name = name;
@@ -100,12 +100,12 @@ namespace DirectoryServices.Entities
             // валидация идентификатора
             if (string.IsNullOrWhiteSpace(identifier.Value) || identifier.Value.Length < 2 || identifier.Value.Length > 10)
             {
-                return "Идентификатор отдела должно быть 2-10 символов!";
+                return Error.Validation("departament.incorrect.identifier", "Идентификатор отдела должно быть 2-10 символов!");
             }
 
             if (!Regex.IsMatch(identifier.Value, @"^[a-z\-]+$"))
             {
-                return "В идентификаторе допускаются только латиница в нижнем регистре и дефисы";
+                return Error.Validation("departament.incorrect.identifier", "В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
             }
 
             Identifier = identifier;
@@ -119,7 +119,7 @@ namespace DirectoryServices.Entities
             // проверка списка локаций
             if (locations == null || !locations.Any())
             {
-                return "Список локаций не должен быть пустым!";
+                return Error.Validation("departament.incorrect.locations", "Список локаций не должен быть пустым!");
             }
 
             _locations.Concat(locations);
@@ -133,7 +133,7 @@ namespace DirectoryServices.Entities
             // проверка списка позиций
             if (positions == null || !positions.Any())
             {
-                return "Список позиций не должен быть пустым!";
+                return Error.Validation("departament.incorrect.positions", "Список позиций не должен быть пустым!");
             }
 
             _positions.Concat(positions);

@@ -13,6 +13,12 @@
   <ItemGroup>
     <ProjectReference Include="..\DirectoryServices.Contracts\DirectoryServices.Contracts.csproj" />
     <ProjectReference Include="..\DirectoryServices.Entities\DirectoryServices.Entities.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Departaments\" />
+    <Folder Include="Positions\" />
   </ItemGroup>
 
 </Project>

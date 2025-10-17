@@ -1,10 +1,8 @@
 ﻿using DirectoryServices.Application.Locations;
 using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities;
-using DirectoryServices.Entities.Shared;
-using DirectoryServices.Entities.ValueObjects.Departaments;
-using DirectoryServices.Entities.ValueObjects.Positions;
 using Microsoft.AspNetCore.Mvc;
+using Shared.EndpointResult;
 
 namespace DirectoryServices.Presenters
 {
@@ -20,16 +18,14 @@ namespace DirectoryServices.Presenters
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLocation([FromBody] CreateLocationDto createLocationDTO, CancellationToken cancellationToken)
+        [ProducesResponseType<Envelope<Location>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<Location>> CreateLocation([FromBody] CreateLocationDto createLocationDTO, CancellationToken cancellationToken)
         {
-            var location = await _locationsService.Create(createLocationDTO, cancellationToken);
-
-            if(location.IsFailure)
-            {
-                return BadRequest(location.Error);
-            }
-
-            return Ok(location);
+            return await _locationsService.Create(createLocationDTO, cancellationToken);
         }
     }
 }
