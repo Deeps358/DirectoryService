@@ -7,8 +7,8 @@ namespace DirectoryServices.Entities
     public partial class Departament
     {
         private readonly List<Departament> _childrens = [];
-        private readonly List<DepartmentLocation> _locations = [];
-        private readonly List<DepartmentPosition> _positions = [];
+        private readonly List<DepartmentLocation> _departamentLocations = [];
+        private readonly List<DepartmentPosition> _departamentPositions = [];
 
         private Departament()
         {
@@ -31,8 +31,8 @@ namespace DirectoryServices.Entities
             Path = path;
             Parent = parent;
             Depth = depth;
-            _locations = locations.ToList();
-            _positions = positions.ToList();
+            _departamentLocations = locations.ToList();
+            _departamentPositions = positions.ToList();
             IsActive = isActive;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -54,9 +54,9 @@ namespace DirectoryServices.Entities
 
         public short Depth { get; private set; }
 
-        public IReadOnlyList<DepartmentLocation> Locations => _locations;
+        public IReadOnlyList<DepartmentLocation> DepartamentLocations => _departamentLocations;
 
-        public IReadOnlyList<DepartmentPosition> Positions => _positions;
+        public IReadOnlyList<DepartmentPosition> DepartamentPositions => _departamentPositions;
 
         public bool IsActive { get; private set; }
 
@@ -67,12 +67,14 @@ namespace DirectoryServices.Entities
         public static Result<Departament> Create(
             DepName name,
             DepIdentifier identifier,
-            DepPath path,
             Departament? parent,
             IEnumerable<DepartmentLocation> locations,
             IEnumerable<DepartmentPosition> positions,
             bool isActive)
         {
+            // логика записи пути отдела
+            DepPath path = DepPath.Create(parent?.Path.Value ?? null, identifier);
+
             // логика записи глубины отдела
             short depth = Convert.ToInt16(parent?.Depth + 1 ?? 1);
 
@@ -86,7 +88,7 @@ namespace DirectoryServices.Entities
         {
             if (string.IsNullOrWhiteSpace(name.Value) || name.Value.Length < 3 || name.Value.Length > 150)
             {
-                return Error.Validation("departament.incorrect.name", "Название отдела должно быть 3-150 символов!"); // перегрузка оператора в Result
+                return Error.Validation("departament.incorrect.name", ["Название отдела должно быть 3-150 символов!"]); // перегрузка оператора в Result
             }
 
             Name = name;
@@ -100,12 +102,12 @@ namespace DirectoryServices.Entities
             // валидация идентификатора
             if (string.IsNullOrWhiteSpace(identifier.Value) || identifier.Value.Length < 2 || identifier.Value.Length > 10)
             {
-                return Error.Validation("departament.incorrect.identifier", "Идентификатор отдела должно быть 2-10 символов!");
+                return Error.Validation("departament.incorrect.identifier", ["Идентификатор отдела должно быть 2-10 символов!"]);
             }
 
             if (!Regex.IsMatch(identifier.Value, @"^[a-z\-]+$"))
             {
-                return Error.Validation("departament.incorrect.identifier", "В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
+                return Error.Validation("departament.incorrect.identifier", ["В идентификаторе допускаются только латиница в нижнем регистре и дефисы"]);
             }
 
             Identifier = identifier;
@@ -119,10 +121,10 @@ namespace DirectoryServices.Entities
             // проверка списка локаций
             if (locations == null || !locations.Any())
             {
-                return Error.Validation("departament.incorrect.locations", "Список локаций не должен быть пустым!");
+                return Error.Validation("departament.incorrect.locations", ["Список локаций не должен быть пустым!"]);
             }
 
-            _locations.Concat(locations);
+            _departamentLocations.Concat(locations);
             UpdatedAt = DateTime.UtcNow;
 
             return this;
@@ -133,10 +135,10 @@ namespace DirectoryServices.Entities
             // проверка списка позиций
             if (positions == null || !positions.Any())
             {
-                return Error.Validation("departament.incorrect.positions", "Список позиций не должен быть пустым!");
+                return Error.Validation("departament.incorrect.positions", ["Список позиций не должен быть пустым!"]);
             }
 
-            _positions.Concat(positions);
+            _departamentPositions.Concat(positions);
             UpdatedAt = DateTime.UtcNow;
 
             return this;

@@ -21,7 +21,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // валидация зоны
             if (string.IsNullOrWhiteSpace(timezone))
             {
-                return Error.Validation("location.empty.timezone", "Название временной зоны должно быть!");
+                return Error.Validation("location.empty.timezone", ["Название временной зоны должно быть!"]);
             }
 
             try
@@ -30,7 +30,7 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             }
             catch (TimeZoneNotFoundException)
             {
-                return Error.Validation("location.incorrect.timezone", "Название временной зоны введено некорректно!");
+                return Error.Validation("location.incorrect.timezone", ["Название временной зоны введено некорректно!"]);
             }
 
             return new LocTimezone(timezone);

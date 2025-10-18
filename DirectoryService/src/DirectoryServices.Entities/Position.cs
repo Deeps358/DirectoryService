@@ -5,6 +5,8 @@ namespace DirectoryServices.Entities
 {
     public partial class Position
     {
+        private readonly List<DepartmentPosition> _departmentPositions = [];
+
         public Position()
         {
             // efcore не ругайся
@@ -31,6 +33,8 @@ namespace DirectoryServices.Entities
         public PosDescription? Description { get; private set; }
 
         public bool IsActive { get; private set; }
+
+        public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
         public DateTime CreatedAt { get; private set; }
 

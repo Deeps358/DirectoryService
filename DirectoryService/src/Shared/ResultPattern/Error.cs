@@ -4,11 +4,11 @@ namespace Shared.ResultPattern
 {
     public record Error
     {
-        public static Error None = new Error(string.Empty, string.Empty, ErrorType.NONE);
+        public static Error None = new Error(string.Empty, [string.Empty], ErrorType.NONE);
 
         public string Code { get; }
 
-        public string Message { get; }
+        public string[] Message { get; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ErrorType Type { get; }
@@ -18,7 +18,7 @@ namespace Shared.ResultPattern
         [JsonConstructor]
         private Error(
             string code,
-            string message,
+            string[] message,
             ErrorType type,
             string? invalidField = null)
         {
@@ -28,16 +28,16 @@ namespace Shared.ResultPattern
             InvalidField = invalidField;
         }
 
-        public static Error NotFound(string? code, string message)
+        public static Error NotFound(string? code, string[] message)
             => new(code ?? "record.not.found", message, ErrorType.NOT_FOUND);
 
-        public static Error Validation(string? code, string message, string? invalidField = null)
+        public static Error Validation(string? code, string[] message, string? invalidField = null)
             => new(code ?? "invalid.value", message, ErrorType.VALIDATION, invalidField);
 
-        public static Error Conflict(string? code, string message)
+        public static Error Conflict(string? code, string[] message)
             => new(code ?? "conflict.value", message, ErrorType.CONFLICT);
 
-        public static Error Failure(string? code, string message)
+        public static Error Failure(string? code, string[] message)
             => new(code ?? "something.wrong", message, ErrorType.FAILURE);
     }
 

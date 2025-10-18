@@ -67,10 +67,12 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("DepartamentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("departament_id");
 
                     b.Property<Guid>("LocationId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("location_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -96,13 +98,12 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("DepartamentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("DepartamentId1")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("departament_id");
 
                     b.Property<Guid>("PositionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("position_id");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -111,8 +112,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                         .HasName("pk_departament_position");
 
                     b.HasIndex("DepartamentId");
-
-                    b.HasIndex("DepartamentId1");
 
                     b.HasIndex("PositionId");
 
@@ -246,13 +245,13 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("DirectoryServices.Entities.DepartmentLocation", b =>
                 {
                     b.HasOne("DirectoryServices.Entities.Departament", null)
-                        .WithMany("Locations")
+                        .WithMany("DepartamentLocations")
                         .HasForeignKey("DepartamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DirectoryServices.Entities.Location", null)
-                        .WithMany()
+                        .WithMany("DepartmentLocations")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -261,17 +260,13 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("DirectoryServices.Entities.DepartmentPosition", b =>
                 {
                     b.HasOne("DirectoryServices.Entities.Departament", null)
-                        .WithMany()
+                        .WithMany("DepartamentPositions")
                         .HasForeignKey("DepartamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DirectoryServices.Entities.Departament", null)
-                        .WithMany("Positions")
-                        .HasForeignKey("DepartamentId1");
-
                     b.HasOne("DirectoryServices.Entities.Position", null)
-                        .WithMany()
+                        .WithMany("DepartmentPositions")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -284,11 +279,21 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                             b1.Property<Guid>("LocationId")
                                 .HasColumnType("uuid");
 
+                            b1.Property<int>("Building")
+                                .HasColumnType("integer")
+                                .HasColumnName("building");
+
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
                                 .HasColumnType("character varying(100)")
                                 .HasColumnName("city");
+
+                            b1.Property<string>("Room")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("room");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
@@ -313,8 +318,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
                                 .HasColumnName("name");
 
                             b1.HasKey("LocationId");
@@ -382,8 +387,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
                                 .HasColumnName("name");
 
                             b1.HasKey("PositionId");
@@ -404,9 +409,19 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                 {
                     b.Navigation("Childrens");
 
-                    b.Navigation("Locations");
+                    b.Navigation("DepartamentLocations");
 
-                    b.Navigation("Positions");
+                    b.Navigation("DepartamentPositions");
+                });
+
+            modelBuilder.Entity("DirectoryServices.Entities.Location", b =>
+                {
+                    b.Navigation("DepartmentLocations");
+                });
+
+            modelBuilder.Entity("DirectoryServices.Entities.Position", b =>
+                {
+                    b.Navigation("DepartmentPositions");
                 });
 #pragma warning restore 612, 618
         }
