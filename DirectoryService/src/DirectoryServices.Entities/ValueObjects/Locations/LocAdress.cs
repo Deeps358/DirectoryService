@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Contracts.Locations;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
@@ -28,25 +29,32 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
 
         public static Result<LocAdress> Create(AdressDto adress)
         {
-            // валидация имени
+            List<string> errs = new();
+
+            // валидация
             if (string.IsNullOrWhiteSpace(adress.City))
             {
-                return Error.Validation("location.incorrect.city", "Название города пустое");
+                errs.Add("Название города пустое");
             }
 
             if (string.IsNullOrWhiteSpace(adress.Street))
             {
-                return Error.Validation("location.incorrect.street", "Название улицы пустое");
+                errs.Add("Название улицы пустое");
             }
 
             if (adress.Building <= 0)
             {
-                return Error.Validation("location.incorrect.building", "Странный номер здания");
+                errs.Add("Странный номер здания");
             }
 
             if (string.IsNullOrWhiteSpace(adress.Room))
             {
-                return Error.Validation("location.incorrect.room", "Номер комнаты пуст");
+                errs.Add("Номер комнаты пуст");
+            }
+
+            if(errs.Any())
+            {
+                return Error.Validation("location.incorrect.adress", errs.ToArray());
             }
 
             return new LocAdress(adress);
