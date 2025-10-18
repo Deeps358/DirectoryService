@@ -5,6 +5,8 @@ namespace DirectoryServices.Entities
 {
     public partial class Location
     {
+        private readonly List<DepartmentLocation> _departmentLocations = [];
+
         public Location()
         {
             // efcore не ругайся
@@ -35,6 +37,8 @@ namespace DirectoryServices.Entities
         public LocTimezone Timezone { get; private set; } = null!;
 
         public bool IsActive { get; private set; }
+
+        public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
         public DateTime CreatedAt { get; private set; }
 

@@ -1,4 +1,6 @@
 ﻿using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
+using DirectoryServices.Entities.ValueObjects.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,21 +18,24 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder
                 .Property(dp => dp.Id)
+                .IsRequired()
                 .HasColumnName("id");
 
             builder
-                .HasOne<Departament>()
-                .WithMany()
-                .HasForeignKey(d => d.DepartamentId)
+                .Property(dp => dp.DepartamentId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasColumnName("departament_id")
+                .HasConversion(
+                    value => value.Value,
+                    value => DepId.GetCurrent(value));
 
             builder
-                .HasOne<Position>()
-                .WithMany()
-                .HasForeignKey(p => p.PositionId)
+                .Property(dp => dp.PositionId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasColumnName("position_id")
+                .HasConversion(
+                    value => value.Value,
+                    value => PosId.GetCurrent(value));
         }
     }
 }

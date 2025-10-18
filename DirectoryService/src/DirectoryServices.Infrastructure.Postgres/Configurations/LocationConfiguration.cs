@@ -68,6 +68,10 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
             builder.Property(l => l.UpdatedAt)
                 .IsRequired()
                 .HasColumnName("updatedAt");
+
+            builder.HasMany(l => l.DepartmentLocations)
+                .WithOne()
+                .HasForeignKey(l => l.LocationId);
         }
     }
 }

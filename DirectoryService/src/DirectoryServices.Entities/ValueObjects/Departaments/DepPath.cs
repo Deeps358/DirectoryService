@@ -16,7 +16,7 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
 
         public string Value { get; } = null!;
 
-        public static Result<DepPath> Create(string depPath, DepIdentifier identifier)
+        public static Result<DepPath> Create(string? depPath, DepIdentifier identifier)
         {
             // логика формирования пути отдела
             string path =
