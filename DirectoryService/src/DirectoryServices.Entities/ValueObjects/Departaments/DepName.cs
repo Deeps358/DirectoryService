@@ -18,12 +18,6 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
 
         public static Result<DepName> Create(string name)
         {
-            // валидация имени
-            if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
-            {
-                return GeneralErrors.IncorrectNameError("departament");
-            }
-
             return new DepName(name);
         }
     }

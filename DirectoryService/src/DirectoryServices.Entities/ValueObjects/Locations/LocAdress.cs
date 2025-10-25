@@ -1,6 +1,4 @@
-﻿using DirectoryServices.Contracts.Locations;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Shared.ResultPattern;
+﻿using Shared.ResultPattern;
 
 namespace DirectoryServices.Entities.ValueObjects.Locations
 {
@@ -11,12 +9,12 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
             // чтоб ефкор не ругался
         }
 
-        private LocAdress(AdressDto adress)
+        private LocAdress(string city, string street, int building, string room)
         {
-            City = adress.City;
-            Street = adress.Street;
-            Building = adress.Building;
-            Room = adress.Room;
+            City = city;
+            Street = street;
+            Building = building;
+            Room = room;
         }
 
         public string City { get; } = null!;
@@ -27,37 +25,9 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
 
         public string Room { get; } = null!;
 
-        public static Result<LocAdress> Create(AdressDto adress)
+        public static Result<LocAdress> Create(string city, string street, int building, string room)
         {
-            List<string> errs = new();
-
-            // валидация
-            if (string.IsNullOrWhiteSpace(adress.City))
-            {
-                errs.Add("Название города пустое");
-            }
-
-            if (string.IsNullOrWhiteSpace(adress.Street))
-            {
-                errs.Add("Название улицы пустое");
-            }
-
-            if (adress.Building <= 0)
-            {
-                errs.Add("Странный номер здания");
-            }
-
-            if (string.IsNullOrWhiteSpace(adress.Room))
-            {
-                errs.Add("Номер комнаты пуст");
-            }
-
-            if(errs.Any())
-            {
-                return Error.Validation("location.incorrect.adress", errs.ToArray());
-            }
-
-            return new LocAdress(adress);
+            return new LocAdress(city, street, building, room);
         }
     }
 }

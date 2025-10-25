@@ -18,12 +18,6 @@ namespace DirectoryServices.Entities.ValueObjects.Positions
 
         public static Result<PosName> Create(string name)
         {
-            // валидация имени
-            if (string.IsNullOrWhiteSpace(name) || name.Length < 3 || name.Length > 150)
-            {
-                return GeneralErrors.IncorrectNameError("position");
-            }
-
             return new PosName(name);
         }
     }
