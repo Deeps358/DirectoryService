@@ -23,7 +23,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 var addedLocation = await _dbContext.Locations.AddAsync(location, cancellationToken);
                 await _dbContext.SaveChangesAsync();
 
-                _logger.LogInformation("Добавлена сущность локации с {addedLocation.Entity.Id.Value}", addedLocation.Entity.Id.Value);
+                _logger.LogInformation("В базу добавлена сущность локации с {addedLocation.Entity.Id.Value}", addedLocation.Entity.Id.Value);
 
                 return Result<Location>.Success(location);
             }
