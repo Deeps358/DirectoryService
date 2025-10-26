@@ -18,21 +18,6 @@ namespace DirectoryServices.Entities.ValueObjects.Locations
 
         public static Result<LocTimezone> Create(string timezone)
         {
-            // валидация зоны
-            if (string.IsNullOrWhiteSpace(timezone))
-            {
-                return Error.Validation("location.empty.timezone", ["Название временной зоны должно быть!"]);
-            }
-
-            try
-            {
-                var someTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timezone);
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                return Error.Validation("location.incorrect.timezone", ["Название временной зоны введено некорректно!"]);
-            }
-
             return new LocTimezone(timezone);
         }
     }
