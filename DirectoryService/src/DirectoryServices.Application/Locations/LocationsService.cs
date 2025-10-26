@@ -32,10 +32,6 @@ namespace DirectoryServices.Application.Locations
             }
 
             var newLocName = LocName.Create(location.Name);
-            if (newLocName.IsFailure)
-            {
-                return newLocName.Error!;
-            }
 
             var newLocAdress = LocAdress.Create(
                 location.Adress.City,
@@ -43,27 +39,13 @@ namespace DirectoryServices.Application.Locations
                 location.Adress.Building,
                 location.Adress.Room);
 
-            if (newLocAdress.IsFailure)
-            {
-                return newLocAdress.Error!;
-            }
-
             var newTimeZone = LocTimezone.Create(location.Timezone);
-            if (newTimeZone.IsFailure)
-            {
-                return newTimeZone.Error!;
-            }
 
             Result<Location> locResult = Location.Create(
                 newLocName.Value,
                 newLocAdress.Value,
                 newTimeZone.Value,
                 location.isActive);
-
-            if (locResult.IsFailure)
-            {
-                return locResult.Error!;
-            }
 
             var newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
 
