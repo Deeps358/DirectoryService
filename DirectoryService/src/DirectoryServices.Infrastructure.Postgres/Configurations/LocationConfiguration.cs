@@ -2,6 +2,7 @@
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Xml.Linq;
 
 namespace DirectoryServices.Infrastructure.Postgres.Configurations
 {
@@ -23,6 +24,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("name");
+
+                nb.HasIndex(l => new { l.Value })
+                    .IsUnique();
             });
 
             builder.OwnsOne(l => l.Adress, ab =>
@@ -47,6 +51,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_100)
                     .HasColumnName("room");
+
+                ab.HasIndex(l => new { l.City, l.Street, l.Building, l.Room })
+                    .IsUnique();
             });
 
             builder.OwnsOne(l => l.Timezone, tb =>
