@@ -1,51 +1,52 @@
-﻿using DirectoryServices.Contracts.Locations;
+﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Application.Locations
+namespace DirectoryServices.Application.Locations.CreateLocation
 {
-    public class LocationsService : ILocationsService
+    public class CreateLocationHandler : ICommandHandler<Location, CreateLocationCommand>
     {
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateLocationDto> _validator;
-        private readonly ILogger<LocationsService> _logger;
+        private readonly ILogger<CreateLocationHandler> _logger;
 
-        public LocationsService(
+        public CreateLocationHandler(
             ILocationsRepository locationsRepository,
             IValidator<CreateLocationDto> validator,
-            ILogger<LocationsService> logger)
+            ILogger<CreateLocationHandler> logger)
         {
             _locationsRepository = locationsRepository;
-            _logger = logger;
             _validator = validator;
+            _logger = logger;
         }
 
-        public async Task<Result<Location>> Create(CreateLocationDto location, CancellationToken cancellationToken)
+        public async Task<Result<Location>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(location);
+            var validationResult = await _validator.ValidateAsync(command.Location);
             if (!validationResult.IsValid)
             {
                 return GeneralErrors.InvalidFieldsError("location", validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
             }
 
-            var newLocName = LocName.Create(location.Name);
+            var newLocName = LocName.Create(command.Location.Name);
 
             var newLocAdress = LocAdress.Create(
-                location.Adress.City,
-                location.Adress.Street,
-                location.Adress.Building,
-                location.Adress.Room);
+                command.Location.Adress.City,
+                command.Location.Adress.Street,
+                command.Location.Adress.Building,
+                command.Location.Adress.Room);
 
-            var newTimeZone = LocTimezone.Create(location.Timezone);
+            var newTimeZone = LocTimezone.Create(command.Location.Timezone);
 
             Result<Location> locResult = Location.Create(
                 newLocName.Value,
                 newLocAdress.Value,
                 newTimeZone.Value,
-                location.isActive);
+                command.Location.isActive);
 
             var newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
 

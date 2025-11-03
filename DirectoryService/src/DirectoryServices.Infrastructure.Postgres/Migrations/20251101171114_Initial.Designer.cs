@@ -3,6 +3,7 @@ using System;
 using DirectoryServices.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryServices.Infrastructure.Postgres.Migrations
 {
     [DbContext(typeof(DirectoryServiceDbContext))]
-    partial class DirectoryServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101171114_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -303,9 +306,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("LocationId");
 
-                            b1.HasIndex("City", "Street", "Building", "Room")
-                                .IsUnique();
-
                             b1.ToTable("locations");
 
                             b1.ToJson("adress");
@@ -326,9 +326,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                                 .HasColumnName("name");
 
                             b1.HasKey("LocationId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
 
                             b1.ToTable("locations");
 

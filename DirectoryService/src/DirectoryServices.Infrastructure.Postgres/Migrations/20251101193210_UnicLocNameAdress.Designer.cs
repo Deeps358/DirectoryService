@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryServices.Infrastructure.Postgres.Migrations
 {
     [DbContext(typeof(DirectoryServiceDbContext))]
-    [Migration("20251018134111_Initial")]
-    partial class Initial
+    [Migration("20251101193210_UnicLocNameAdress")]
+    partial class UnicLocNameAdress
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -306,6 +306,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("LocationId");
 
+                            b1.HasIndex("City", "Street", "Building", "Room")
+                                .IsUnique();
+
                             b1.ToTable("locations");
 
                             b1.ToJson("adress");
@@ -326,6 +329,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                                 .HasColumnName("name");
 
                             b1.HasKey("LocationId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
 
                             b1.ToTable("locations");
 
