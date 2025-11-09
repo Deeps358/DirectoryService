@@ -43,7 +43,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
             builder.HasIndex(d => d.ParentId);
 
             builder.Property(d => d.ParentId)
-                .IsRequired()
+                .IsRequired(false)
                 .HasColumnName("parentId");
 
             builder.OwnsOne(d => d.Path, pb =>

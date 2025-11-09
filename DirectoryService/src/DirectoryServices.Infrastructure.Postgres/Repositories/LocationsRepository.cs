@@ -1,5 +1,7 @@
 ﻿using DirectoryServices.Application.Locations;
 using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Locations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -32,6 +34,28 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 _logger.LogError(ex, "Ошибка при записи в БД");
 
                 return Error.Failure("location.incorrect.DB", ["Ошибка добавления локации в базу"]);
+            }
+        }
+
+        public async Task<Result<Location>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Location? receivedLocation = await _dbContext.Locations.FirstOrDefaultAsync(l => l.Id == LocId.GetCurrent(id), cancellationToken);
+                if (receivedLocation == null)
+                {
+                    _logger.LogInformation("Локация с id = {id} не найдена!", id);
+                    return Error.NotFound("location.notfound.id", [$"Локация с id = {id} не найдена!"]);
+                }
+
+                _logger.LogInformation("Получена локация с id = {id}", id);
+                return Result<Location>.Success(receivedLocation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении локации по id из БД");
+
+                return Error.Failure("locations.incorrect.DB", ["Ошибка при получении локации из базы"]);
             }
         }
     }

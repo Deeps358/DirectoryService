@@ -2,6 +2,7 @@
 {
     public record LengthConstants
     {
+        public const int LENGTH_3 = 3;
         public const int LENGTH_100 = 100;
         public const int LENGTH_150 = 150;
         public const int LENGHT_500 = 500;
