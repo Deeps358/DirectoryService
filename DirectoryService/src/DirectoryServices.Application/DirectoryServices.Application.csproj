@@ -19,9 +19,4 @@
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Departaments\" />
-    <Folder Include="Positions\" />
-  </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
 ﻿using DirectoryServices.Application.Abstractions;
-using DirectoryServices.Application.Locations.CreateLocation;
-using DirectoryServices.Contracts.Locations;
+using DirectoryServices.Application.Positions.CreatePosition;
+using DirectoryServices.Contracts.Positions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Shared.EndpointResult;
@@ -9,11 +9,11 @@ namespace DirectoryServices.Presenters
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LocationsController : ControllerBase
+    public class PositionsController : ControllerBase
     {
-        private readonly ILogger<LocationsController> _logger;
+        private readonly ILogger<PositionsController> _logger;
 
-        public LocationsController(ILogger<LocationsController> logger)
+        public PositionsController(ILogger<PositionsController> logger)
         {
             _logger = logger;
         }
@@ -25,11 +25,11 @@ namespace DirectoryServices.Presenters
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
         public async Task<EndpointResult<Guid>> Create(
-            [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler,
-            [FromBody] CreateLocationDto createLocationDTO,
+            [FromServices] ICommandHandler<Guid, CreatePositionCommand> handler,
+            [FromBody] CreatePositionDto createPositionDTO,
             CancellationToken cancellationToken)
         {
-            var command = new CreateLocationCommand(createLocationDTO);
+            var command = new CreatePositionCommand(createPositionDTO);
             return await handler.Handle(command, cancellationToken);
         }
     }

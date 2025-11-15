@@ -16,11 +16,13 @@ namespace DirectoryServices.Entities
             PosId id,
             PosName name,
             PosDescription? description,
+            IEnumerable<DepartmentPosition> departments,
             bool isActive)
         {
             Id = id;
             Name = name;
             Description = description;
+            _departmentPositions = departments.ToList();
             IsActive = isActive;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -40,10 +42,14 @@ namespace DirectoryServices.Entities
 
         public DateTime UpdatedAt { get; private set; }
 
-        public static Result<Position> Create(PosName name, PosDescription? description, bool isActive)
+        public static Result<Position> Create(
+            PosId id,
+            PosName name,
+            PosDescription? description,
+            IEnumerable<DepartmentPosition> departments,
+            bool isActive)
         {
-            var posId = PosId.NewPosId();
-            var position = new Position(posId, name, description, isActive);
+            var position = new Position(id, name, description, departments, isActive);
 
             return position;
         }

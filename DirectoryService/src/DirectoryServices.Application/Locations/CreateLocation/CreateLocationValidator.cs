@@ -20,7 +20,7 @@ namespace DirectoryServices.Application.Locations.CreateLocation
 
             RuleFor(x => x.Adress.Building)
                 .NotEmpty().WithMessage("Номер здания отсутствует")
-                .LessThanOrEqualTo(0).WithMessage("Странный номер здания");
+                .GreaterThanOrEqualTo(1).WithMessage("Странный номер здания");
 
             RuleFor(x => x.Adress.Room)
                 .NotEmpty().WithMessage("Номер комнаты пуст");

@@ -16,6 +16,7 @@ namespace DirectoryServices.Entities
         }
 
         private Departament(
+            DepId id,
             DepName name,
             DepIdentifier identifier,
             DepPath path,
@@ -25,14 +26,14 @@ namespace DirectoryServices.Entities
             IEnumerable<DepartmentPosition> positions,
             bool isActive)
         {
-            Id = DepId.NewDepId();
+            Id = id;
             Name = name;
             Identifier = identifier;
             Path = path;
             Parent = parent;
             Depth = depth;
             _departamentLocations = locations.ToList();
-            _departamentPositions = positions.ToList();
+            _departamentPositions = []/*positions.ToList()*/;
             IsActive = isActive;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -65,6 +66,7 @@ namespace DirectoryServices.Entities
         public DateTime UpdatedAt { get; private set; }
 
         public static Result<Departament> Create(
+            DepId id,
             DepName name,
             DepIdentifier identifier,
             Departament? parent,
@@ -76,10 +78,10 @@ namespace DirectoryServices.Entities
             DepPath path = DepPath.Create(parent?.Path.Value ?? null, identifier);
 
             // логика записи глубины отдела
-            short depth = Convert.ToInt16(parent?.Depth + 1 ?? 1);
+            short depth = Convert.ToInt16(parent?.Depth + 1 ?? 0);
 
             // передача в конструктор
-            var departament = new Departament(name, identifier, path, parent, depth, locations, positions, isActive);
+            var departament = new Departament(id, name, identifier, path, parent, depth, locations, positions, isActive);
 
             return departament;
         }

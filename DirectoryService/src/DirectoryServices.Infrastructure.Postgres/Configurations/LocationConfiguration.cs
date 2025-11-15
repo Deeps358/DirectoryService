@@ -2,7 +2,6 @@
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Xml.Linq;
 
 namespace DirectoryServices.Infrastructure.Postgres.Configurations
 {
