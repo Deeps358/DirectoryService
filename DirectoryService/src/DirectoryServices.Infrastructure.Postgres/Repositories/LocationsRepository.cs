@@ -45,11 +45,11 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 if (receivedLocation == null)
                 {
                     _logger.LogInformation("Локация с id = {id} не найдена!", id);
-                    return Error.NotFound("location.notfound.id", [$"Локация с id = {id} не найдена!"]);
+                    return Error.NotFound("location.not_found.id", [$"Локация с id = {id} не найдена!"]);
                 }
 
                 _logger.LogInformation("Получена локация с id = {id}", id);
-                return Result<Location>.Success(receivedLocation);
+                return receivedLocation;
             }
             catch (Exception ex)
             {

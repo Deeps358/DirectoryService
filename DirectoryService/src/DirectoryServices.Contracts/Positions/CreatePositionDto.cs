@@ -2,6 +2,7 @@
 {
     public record CreatePositionDto(
         string Name,
-        string Description,
+        string? Description,
+        Guid[] DepartmentIds,
         bool IsActive);
 }

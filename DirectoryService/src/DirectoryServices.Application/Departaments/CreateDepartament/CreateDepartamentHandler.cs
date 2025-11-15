@@ -80,14 +80,15 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             // ещё не забыть подразделения
 
-            Result<Departament> depResult = Departament.Create(
+            Departament depResult = Departament.Create(
                 newDepId,
                 newDepName,
                 newDepIdentifier,
                 parent,
                 deplocs,
                 null,
-                true);
+                command.Departament.IsActive)
+                .Value;
 
             Result<Guid> newDep = await _departamentsRepository.CreateAsync(depResult, cancellationToken);
             if (newDep.IsFailure)

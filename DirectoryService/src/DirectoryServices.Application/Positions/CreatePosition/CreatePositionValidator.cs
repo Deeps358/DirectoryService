@@ -14,7 +14,11 @@ namespace DirectoryServices.Application.Positions.CreatePosition
                 .MaximumLength(LengthConstants.LENGTH_150).WithMessage("Имя не может быть больше 150 символов!");
 
             RuleFor(x => x.Description)
-                .MaximumLength(LengthConstants.LENGTH_1000).WithMessage("Имя не может быть больше 1000 символов!");
+                .MaximumLength(LengthConstants.LENGTH_1000).WithMessage("Описание не может быть больше 1000 символов!");
+
+            RuleFor(x => x.DepartmentIds)
+                .NotNull().WithMessage("Необходимо указать хотя бы одно подразделение!")
+                .NotEmpty().WithMessage("Необходимо указать хотя бы одно подразделение!");
         }
     }
 }

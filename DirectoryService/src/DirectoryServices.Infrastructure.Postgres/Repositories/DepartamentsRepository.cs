@@ -1,5 +1,6 @@
 ﻿using DirectoryServices.Application.Departaments;
 using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
@@ -32,7 +33,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation("В базу добавлено новое подразделение с Id = {addedDepartament.Entity.Id.Value}", addedDepartament.Entity.Id.Value);
-                return Result<Guid>.Success(departament.Id.Value);
+                return departament.Id.Value;
             }
             catch (Exception ex)
             {
@@ -46,10 +47,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
         {
             try
             {
-                var receivedDepartament = await _dbContext.Departaments.FirstOrDefaultAsync(d => d.Id.Value == id, cancellationToken);
+                Departament? receivedDepartament = await _dbContext.Departaments.FirstOrDefaultAsync(d => d.Id == DepId.GetCurrent(id), cancellationToken);
+                if (receivedDepartament == null)
+                {
+                    _logger.LogInformation("Департамент с id = {id} не найден!", id);
+                    return Error.NotFound("departament.not_found.id", [$"Департамент с id = {id} не найден!"]);
+                }
 
                 _logger.LogInformation("Получено подразделение с id = {id}", id);
-                return Result<Departament>.Success(receivedDepartament);
+                return receivedDepartament;
             }
             catch (Exception ex)
             {

@@ -26,7 +26,7 @@ namespace DirectoryServices.Application.Locations.CreateLocation
 
         public async Task<Result<Guid>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(command.Location);
+            var validationResult = await _validator.ValidateAsync(command.Location, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return GeneralErrors.InvalidFieldsError("location", validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
