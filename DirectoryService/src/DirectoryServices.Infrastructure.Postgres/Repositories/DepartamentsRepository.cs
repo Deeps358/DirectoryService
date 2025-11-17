@@ -25,10 +25,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             try
             {
                 var addedDepartament = await _dbContext.Departaments.AddAsync(departament, cancellationToken); // сохраняем деп
-                foreach (DepartmentLocation dep in departament.DepartamentLocations)
-                {
-                    var addedRelation = await _dbContext.DepartmentLocations.AddAsync(dep, cancellationToken); // не забываем о связях
-                }
 
                 await _dbContext.SaveChangesAsync();
 

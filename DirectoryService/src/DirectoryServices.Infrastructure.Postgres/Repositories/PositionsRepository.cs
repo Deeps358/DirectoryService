@@ -25,10 +25,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             try
             {
                 var addedPosition = await _dbContext.Positions.AddAsync(position, cancellationToken);
-                foreach (DepartmentPosition pos in position.DepartmentPositions)
-                {
-                    var addedRelation = await _dbContext.DepartmentPositions.AddAsync(pos, cancellationToken);
-                }
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
