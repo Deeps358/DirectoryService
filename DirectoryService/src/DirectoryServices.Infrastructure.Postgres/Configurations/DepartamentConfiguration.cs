@@ -44,7 +44,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder.Property(d => d.ParentId)
                 .IsRequired(false)
-                .HasColumnName("parentId");
+                .HasColumnName("parent_id");
 
             builder.OwnsOne(d => d.Path, pb =>
             {
@@ -60,15 +60,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder.Property(d => d.IsActive)
                 .IsRequired()
-                .HasColumnName("isActive");
+                .HasColumnName("is_active");
 
             builder.Property(d => d.CreatedAt)
                 .IsRequired()
-                .HasColumnName("createdAt");
+                .HasColumnName("created_at");
 
             builder.Property(d => d.UpdatedAt)
                 .IsRequired()
-                .HasColumnName("updatedAt");
+                .HasColumnName("updated_at");
 
             builder.HasMany(d => d.DepartamentLocations)
                 .WithOne()

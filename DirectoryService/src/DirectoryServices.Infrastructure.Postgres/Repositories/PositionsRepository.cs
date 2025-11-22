@@ -3,7 +3,10 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
+using Npgsql;
 using Shared.ResultPattern;
+using System.Xml.Linq;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
 {
@@ -31,34 +34,59 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 _logger.LogInformation("В базу добавлена новая позиция с Id = {addedPosition.Entity.Id.Value}", addedPosition.Entity.Id.Value);
                 return position.Id.Value;
             }
+            catch (DbUpdateException dbex)
+            {
+                var pgEx = dbex.InnerException as PostgresException;
+                if (pgEx?.SqlState == "23505")
+                {
+                    _logger.LogInformation(pgEx.ConstraintName, "Сработал индекс уникальности при создании позиции в БД");
+                    return pgEx.ConstraintName switch
+                    {
+                        "IX_positions_name" => Error.Conflict("positions.duplicate.name", ["В системе уже есть активная позиция с таким именем!"]),
+                        _ => Error.Conflict("positions.duplicate.field", ["В системе уже есть активная позиция с таким *ОШИБКА*"])
+                    };
+                }
+
+                return Error.Failure("position.incorrect.DB", ["Ошибка добавления позиции в базу"]);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при записи в БД");
 
-                return Error.Failure("position.incorrect.DB", ["Ошибка добавления позиции в базу"]);
+                return Error.Failure("position.incorrect.unknown", ["Неизвестная ошибка добавления позиции в базу"]);
             }
         }
 
-        public async Task<Result<Position>> GetByNameAsync(PosName name, CancellationToken cancellationToken)
+        public async Task<Result<Position[]>> GetByNameAsync(PosName[] names, CancellationToken cancellationToken)
         {
+            names = names.Distinct().ToArray(); // сразу чистим от дубликатов
             try
             {
-                Position? receivedPosition = await _dbContext.Positions.FirstOrDefaultAsync(p => p.Name.Value == name.Value && p.IsActive == true, cancellationToken);
-                if (receivedPosition != null)
+                Position[] receivedPositions = await _dbContext.Positions
+                    .Where(p => names.Contains(p.Name))
+                    .ToArrayAsync(cancellationToken);
+
+                string[] missingNames = names
+                    .Except(receivedPositions.Select(x => x.Name))
+                    .Select(x => x.Value)
+                    .ToArray();
+
+                if (missingNames.Length > 0)
                 {
-                    _logger.LogInformation("Получена позиция с именем {name.Value}", name.Value);
-                }
-                else
-                {
-                    _logger.LogInformation("Не найдена позиция с именем {name.Value}", name.Value);
+                    string stringMissedNames = string.Join(", ", missingNames);
+                    _logger.LogInformation("Не найдены позиции с именами: {stringNames}", stringMissedNames);
+                    return Error.NotFound("positions.not_found.names", [$"Позиции с именами: {stringMissedNames} не найдены!"]);
                 }
 
-                return receivedPosition;
+                string stringNames = string.Join(", ", names.Select(x => x.Value));
+
+                _logger.LogInformation("Получены позиции с с именами: {stringNames}", stringNames);
+                return receivedPositions;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении позиции по имени из БД");
-                return Error.Failure("departament.incorrect.DB", ["Ошибка при получении позиции из базы"]);
+                _logger.LogError(ex, "Ошибка при получении позиций по имени из БД");
+                return Error.Failure("positions.incorrect.DB", ["Ошибка при получении позиций по имени из базы"]);
             }
         }
     }

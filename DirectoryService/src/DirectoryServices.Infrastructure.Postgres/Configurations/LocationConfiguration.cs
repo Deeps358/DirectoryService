@@ -65,15 +65,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder.Property(l => l.IsActive)
                 .IsRequired()
-                .HasColumnName("isActive");
+                .HasColumnName("is_active");
 
             builder.Property(l => l.CreatedAt)
                 .IsRequired()
-                .HasColumnName("createdAt");
+                .HasColumnName("created_at");
 
             builder.Property(l => l.UpdatedAt)
                 .IsRequired()
-                .HasColumnName("updatedAt");
+                .HasColumnName("updated_at");
 
             builder.HasMany(l => l.DepartmentLocations)
                 .WithOne()

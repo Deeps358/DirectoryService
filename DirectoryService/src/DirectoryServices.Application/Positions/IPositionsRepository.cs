@@ -8,6 +8,6 @@ namespace DirectoryServices.Application.Positions
     {
         Task<Result<Guid>> CreateAsync(Position position, CancellationToken cancellationToken);
 
-        Task<Result<Position>> GetByNameAsync(PosName name, CancellationToken cancellationToken);
+        Task<Result<Position[]>> GetByNameAsync(PosName[] names, CancellationToken cancellationToken);
     }
 }

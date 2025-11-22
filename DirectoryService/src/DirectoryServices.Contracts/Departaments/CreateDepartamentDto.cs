@@ -4,6 +4,6 @@
         string Name,
         string Identifier,
         Guid? ParentId,
-        Guid[]? LocationsIds,
+        Guid[] LocationsIds,
         bool IsActive);
 }

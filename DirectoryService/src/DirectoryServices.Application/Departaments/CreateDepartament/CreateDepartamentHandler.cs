@@ -52,12 +52,13 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             if (command.Departament.ParentId.HasValue)
             {
-                parent = await _departamentsRepository.GetByIdAsync(command.Departament.ParentId.Value, cancellationToken);
-
-                if (parent == null)
+                Result<Departament[]> requestedParent = await _departamentsRepository.GetByIdAsync([command.Departament.ParentId.Value], cancellationToken);
+                if (requestedParent.IsFailure)
                 {
-                    return Error.NotFound("departament.notfound.parent", ["Идентификатор заданного родителя некорректный"]);
+                    return requestedParent.Error;
                 }
+
+                parent = requestedParent.Value[0];
 
                 if (parent.Identifier == newDepIdentifier)
                 {
@@ -67,14 +68,14 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             List<DepartmentLocation> deplocs = new List<DepartmentLocation>();
 
-            foreach (var locationId in command.Departament.LocationsIds) // проверку на пустоту не делаем, она в валидаторе
+            Result<Location[]> locations = await _locationsRepository.GetByIdAsync(command.Departament.LocationsIds, cancellationToken);
+            if (locations.IsFailure)
             {
-                Result<Location> location = await _locationsRepository.GetByIdAsync(locationId, cancellationToken);
-                if (location.IsFailure)
-                {
-                    return location.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
-                }
+                return locations.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
+            }
 
+            foreach (Guid locationId in command.Departament.LocationsIds)
+            {
                 deplocs.Add(DepartmentLocation.Create(newDepId, LocId.GetCurrent(locationId)));
             }
 

@@ -37,25 +37,41 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<Result<Location>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Result<Location[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken)
         {
+            ids = ids.Distinct().ToArray();
             try
             {
-                Location? receivedLocation = await _dbContext.Locations.FirstOrDefaultAsync(l => l.Id == LocId.GetCurrent(id), cancellationToken);
-                if (receivedLocation == null)
+                LocId[] locIds = ids
+                    .Select(LocId.GetCurrent)
+                    .ToArray();
+
+                Location[] receivedLocation = await _dbContext.Locations
+                    .Where(l => locIds.Contains(l.Id))
+                    .ToArrayAsync(cancellationToken);
+
+                Guid[] missingIds = ids
+                    .Except(receivedLocation
+                    .Select(x => x.Id.Value))
+                    .ToArray();
+
+                if (missingIds.Length > 0) // нашли не всё что дали на вход
                 {
-                    _logger.LogInformation("Локация с id = {id} не найдена!", id);
-                    return Error.NotFound("location.not_found.id", [$"Локация с id = {id} не найдена!"]);
+                    string stringMissedIds = string.Join(", ", missingIds);
+                    _logger.LogInformation("Локации с id = {stringMissedIds} не найдены!", stringMissedIds);
+                    return Error.NotFound("location.not_found.ids", [$"Локации с id = {stringMissedIds} не найдены!"]);
                 }
 
-                _logger.LogInformation("Получена локация с id = {id}", id);
+                string stringIds = string.Join(", ", ids);
+
+                _logger.LogInformation("Получены локации с id = {stringIds}", stringIds);
                 return receivedLocation;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении локации по id из БД");
+                _logger.LogError(ex, "Ошибка при получении локаций по id из БД");
 
-                return Error.Failure("locations.incorrect.DB", ["Ошибка при получении локации из базы"]);
+                return Error.Failure("locations.incorrect.DB", ["Ошибка при получении локаций из базы"]);
             }
         }
     }

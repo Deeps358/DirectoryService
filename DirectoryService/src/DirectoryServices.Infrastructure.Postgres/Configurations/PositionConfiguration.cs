@@ -23,6 +23,10 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("name");
+
+                nb.HasIndex(p => new { p.Value })
+                    .IsUnique()
+                    .HasFilter("\"is_active\" IS TRUE");
             });
 
             builder.OwnsOne(p => p.Description, nb =>
@@ -36,15 +40,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder.Property(p => p.IsActive)
                 .IsRequired()
-                .HasColumnName("isActive");
+                .HasColumnName("is_active");
 
             builder.Property(p => p.CreatedAt)
                 .IsRequired()
-                .HasColumnName("createdAt");
+                .HasColumnName("created_at");
 
             builder.Property(p => p.UpdatedAt)
                 .IsRequired()
-                .HasColumnName("updatedAt");
+                .HasColumnName("updated_at");
 
             builder.HasMany(p => p.DepartmentPositions)
                 .WithOne()

@@ -7,6 +7,6 @@ namespace DirectoryServices.Application.Locations
     {
         Task<Result<Guid>> CreateAsync(Location location, CancellationToken cancellationToken);
 
-        Task<Result<Location>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Result<Location[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
     }
 }

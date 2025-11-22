@@ -40,7 +40,7 @@ namespace DirectoryServices.Application.Positions.CreatePosition
             PosId newPosId = PosId.NewPosId();
             PosName newPosName = PosName.Create(command.Position.Name);
 
-            Result<Position> checkPosName = await _positionsRepository.GetByNameAsync(newPosName, cancellationToken);
+            /*Result<Position> checkPosName = await _positionsRepository.GetByNameAsync(newPosName, cancellationToken);
             if (checkPosName.IsFailure)
             {
                 return checkPosName.Error;
@@ -49,21 +49,21 @@ namespace DirectoryServices.Application.Positions.CreatePosition
             if (checkPosName.Value != null)
             {
                 return Error.Conflict("position.duplicate.name", ["Такое имя позиции уже есть!"]);
-            }
+            }*/
 
             PosDescription newPosDesc = PosDescription.Create(command.Position.Description).Value;
 
             // проверка на существующие депы
             List<DepartmentPosition> depPositions = new List<DepartmentPosition>();
 
-            foreach (Guid departamentId in command.Position.DepartmentIds.Distinct()) // сразу убираем дубликаты
+            Result<Departament[]> departaments = await _departamentsRepository.GetByIdAsync(command.Position.DepartmentIds, cancellationToken);
+            if (departaments.IsFailure)
             {
-                Result<Departament> departament = await _departamentsRepository.GetByIdAsync(departamentId, cancellationToken);
-                if (departament.IsFailure)
-                {
-                    return departament.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
-                }
+                return departaments.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
+            }
 
+            foreach (Guid departamentId in command.Position.DepartmentIds)
+            {
                 depPositions.Add(DepartmentPosition.Create(DepId.GetCurrent(departamentId), newPosId));
             }
 

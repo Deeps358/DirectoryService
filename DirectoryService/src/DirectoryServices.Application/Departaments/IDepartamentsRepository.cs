@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Departaments
@@ -7,6 +8,6 @@ namespace DirectoryServices.Application.Departaments
     {
         Task<Result<Guid>> CreateAsync(Departament departament, CancellationToken cancellationToken);
 
-        Task<Result<Departament>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
     }
 }

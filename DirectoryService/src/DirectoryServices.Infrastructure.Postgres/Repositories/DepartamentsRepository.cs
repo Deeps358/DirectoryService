@@ -1,6 +1,7 @@
 ﻿using DirectoryServices.Application.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
+using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
@@ -39,25 +40,41 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<Result<Departament>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken)
         {
+            ids = ids.Distinct().ToArray(); // сразу чистим от дубликатов
             try
             {
-                Departament? receivedDepartament = await _dbContext.Departaments.FirstOrDefaultAsync(d => d.Id == DepId.GetCurrent(id), cancellationToken);
-                if (receivedDepartament == null)
+                DepId[] depIds = ids
+                    .Select(DepId.GetCurrent)
+                    .ToArray();
+
+                Departament[] receivedDepartaments = await _dbContext.Departaments
+                    .Where(d => depIds.Contains(d.Id))
+                    .ToArrayAsync(cancellationToken);
+
+                Guid[] missingIds = ids
+                    .Except(receivedDepartaments
+                    .Select(d => d.Id.Value))
+                    .ToArray();
+
+                if (missingIds.Length > 0) // нашли не всё что дали на вход
                 {
-                    _logger.LogInformation("Департамент с id = {id} не найден!", id);
-                    return Error.NotFound("departament.not_found.id", [$"Департамент с id = {id} не найден!"]);
+                    string stringMissedIds = string.Join(", ", missingIds);
+                    _logger.LogInformation("Департаменты с id = {missingIds} не найден!", stringMissedIds);
+                    return Error.NotFound("departament.not_found.ids", [$"Департаменты с id = {stringMissedIds} не найдены!"]);
                 }
 
-                _logger.LogInformation("Получено подразделение с id = {id}", id);
-                return receivedDepartament;
+                string stringIds = string.Join(", ", ids);
+
+                _logger.LogInformation("Получены подразделения с id = {stringIds}", stringIds);
+                return receivedDepartaments;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении депа по id из БД");
+                _logger.LogError(ex, "Ошибка при получении депов по id из БД");
 
-                return Error.Failure("departament.incorrect.DB", ["Ошибка при получении депа из базы"]);
+                return Error.Failure("departament.incorrect.DB", ["Ошибка при получении депов из базы"]);
             }
         }
     }
