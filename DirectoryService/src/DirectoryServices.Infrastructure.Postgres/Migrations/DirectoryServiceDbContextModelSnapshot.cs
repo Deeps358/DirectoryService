@@ -303,9 +303,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("LocationId");
 
-                            b1.HasIndex("City", "Street", "Building", "Room")
-                                .IsUnique();
-
                             b1.ToTable("locations");
 
                             b1.ToJson("adress");
@@ -399,8 +396,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                             b1.HasKey("PositionId");
 
                             b1.HasIndex("Value")
-                                .IsUnique()
-                                .HasFilter("\"is_active\" IS TRUE");
+                                .IsUnique();
 
                             b1.ToTable("positions");
 

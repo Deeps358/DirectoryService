@@ -56,7 +56,10 @@ namespace DirectoryServices.Application.Positions.CreatePosition
             // проверка на существующие депы
             List<DepartmentPosition> depPositions = new List<DepartmentPosition>();
 
-            Result<Departament[]> departaments = await _departamentsRepository.GetByIdAsync(command.Position.DepartmentIds, cancellationToken);
+            Result<Departament[]> departaments = await _departamentsRepository.GetByIdAsync(
+                command.Position.DepartmentIds.Distinct().ToArray(),
+                cancellationToken);
+
             if (departaments.IsFailure)
             {
                 return departaments.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено

@@ -51,8 +51,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .HasMaxLength(LengthConstants.LENGTH_100)
                     .HasColumnName("room");
 
-                ab.HasIndex(l => new { l.City, l.Street, l.Building, l.Room })
-                    .IsUnique();
+                // здесь индекс на уникальный адрес не сработал. это надо делать в миграции
             });
 
             builder.OwnsOne(l => l.Timezone, tb =>

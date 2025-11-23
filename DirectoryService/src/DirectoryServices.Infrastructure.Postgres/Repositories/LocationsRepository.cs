@@ -3,6 +3,7 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
@@ -29,17 +30,32 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
                 return Result<Guid>.Success(location.Id.Value);
             }
+            catch (DbUpdateException dbex)
+            {
+                var pgEx = dbex.InnerException as PostgresException;
+                if (pgEx?.SqlState == "23505")
+                {
+                    _logger.LogInformation(pgEx.ConstraintName, "Сработал индекс уникальности при создании локации в БД");
+                    return pgEx.ConstraintName switch
+                    {
+                        "IX_locations_name" => Error.Conflict("locations.duplicate.name", ["В системе уже есть локация с таким именем!"]),
+                        "IX_locations_adress" => Error.Conflict("locations.duplicate.adress", ["В системе уже есть локация с таким адресом!"]),
+                        _ => Error.Conflict("locations.duplicate.field", ["В системе уже есть локация с таким *ОШИБКА*"])
+                    };
+                }
+
+                return Error.Failure("location.incorrect.DB", ["Ошибка добавления позиции в базу"]);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при записи в БД");
 
-                return Error.Failure("location.incorrect.DB", ["Ошибка добавления локации в базу"]);
+                return Error.Failure("location.incorrect.unknown", ["Неизвестная ошибка добавления локации в базу"]);
             }
         }
 
         public async Task<Result<Location[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken)
         {
-            ids = ids.Distinct().ToArray();
             try
             {
                 LocId[] locIds = ids

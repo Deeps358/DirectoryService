@@ -25,8 +25,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .HasColumnName("name");
 
                 nb.HasIndex(p => new { p.Value })
-                    .IsUnique()
-                    .HasFilter("\"is_active\" IS TRUE");
+                    .IsUnique();
             });
 
             builder.OwnsOne(p => p.Description, nb =>

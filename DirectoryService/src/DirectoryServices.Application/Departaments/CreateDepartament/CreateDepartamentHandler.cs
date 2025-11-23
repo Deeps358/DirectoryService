@@ -68,7 +68,10 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             List<DepartmentLocation> deplocs = new List<DepartmentLocation>();
 
-            Result<Location[]> locations = await _locationsRepository.GetByIdAsync(command.Departament.LocationsIds, cancellationToken);
+            Result<Location[]> locations = await _locationsRepository.GetByIdAsync(
+                command.Departament.LocationsIds.Distinct().ToArray(),
+                cancellationToken);
+
             if (locations.IsFailure)
             {
                 return locations.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено

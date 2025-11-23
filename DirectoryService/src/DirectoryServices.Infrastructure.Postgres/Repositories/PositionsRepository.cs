@@ -42,8 +42,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                     _logger.LogInformation(pgEx.ConstraintName, "Сработал индекс уникальности при создании позиции в БД");
                     return pgEx.ConstraintName switch
                     {
-                        "IX_positions_name" => Error.Conflict("positions.duplicate.name", ["В системе уже есть активная позиция с таким именем!"]),
-                        _ => Error.Conflict("positions.duplicate.field", ["В системе уже есть активная позиция с таким *ОШИБКА*"])
+                        "IX_positions_name" => Error.Conflict("positions.duplicate.name", ["В системе уже есть позиция с таким именем!"]),
+                        _ => Error.Conflict("positions.duplicate.field", ["В системе уже есть позиция с таким *ОШИБКА*"])
                     };
                 }
 
@@ -59,7 +59,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
         public async Task<Result<Position[]>> GetByNameAsync(PosName[] names, CancellationToken cancellationToken)
         {
-            names = names.Distinct().ToArray(); // сразу чистим от дубликатов
             try
             {
                 Position[] receivedPositions = await _dbContext.Positions

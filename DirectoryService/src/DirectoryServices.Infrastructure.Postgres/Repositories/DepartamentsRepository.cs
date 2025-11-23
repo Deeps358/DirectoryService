@@ -42,7 +42,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
         public async Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken)
         {
-            ids = ids.Distinct().ToArray(); // сразу чистим от дубликатов
             try
             {
                 DepId[] depIds = ids
