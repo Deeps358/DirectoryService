@@ -2,7 +2,6 @@
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Xml.Linq;
 
 namespace DirectoryServices.Infrastructure.Postgres.Configurations
 {
@@ -52,8 +51,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .HasMaxLength(LengthConstants.LENGTH_100)
                     .HasColumnName("room");
 
-                ab.HasIndex(l => new { l.City, l.Street, l.Building, l.Room })
-                    .IsUnique();
+                // здесь индекс на уникальный адрес не сработал. это надо делать в миграции
             });
 
             builder.OwnsOne(l => l.Timezone, tb =>
@@ -66,15 +64,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
 
             builder.Property(l => l.IsActive)
                 .IsRequired()
-                .HasColumnName("isActive");
+                .HasColumnName("is_active");
 
             builder.Property(l => l.CreatedAt)
                 .IsRequired()
-                .HasColumnName("createdAt");
+                .HasColumnName("created_at");
 
             builder.Property(l => l.UpdatedAt)
                 .IsRequired()
-                .HasColumnName("updatedAt");
+                .HasColumnName("updated_at");
 
             builder.HasMany(l => l.DepartmentLocations)
                 .WithOne()

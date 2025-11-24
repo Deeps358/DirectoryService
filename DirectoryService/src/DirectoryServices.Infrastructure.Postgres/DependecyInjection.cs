@@ -1,4 +1,6 @@
-﻿using DirectoryServices.Application.Locations;
+﻿using DirectoryServices.Application.Departaments;
+using DirectoryServices.Application.Locations;
+using DirectoryServices.Application.Positions;
 using DirectoryServices.Infrastructure.Postgres.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,8 @@ namespace DirectoryServices.Infrastructure.Postgres
                 new DirectoryServiceDbContext(configuration.GetConnectionString("DirectoryServiceDevDb")!));
 
             services.AddScoped<ILocationsRepository, LocationsRepository>();
+            services.AddScoped<IDepartamentsRepository, DepartamentsRepository>();
+            services.AddScoped<IPositionsRepository, PositionsRepository>();
 
             return services;
         }

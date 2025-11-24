@@ -8,7 +8,7 @@ using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Locations.CreateLocation
 {
-    public class CreateLocationHandler : ICommandHandler<Location, CreateLocationCommand>
+    public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
     {
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateLocationDto> _validator;
@@ -24,31 +24,31 @@ namespace DirectoryServices.Application.Locations.CreateLocation
             _logger = logger;
         }
 
-        public async Task<Result<Location>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(command.Location);
+            var validationResult = await _validator.ValidateAsync(command.Location, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return GeneralErrors.InvalidFieldsError("location", validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
             }
 
-            var newLocName = LocName.Create(command.Location.Name);
+            Result<LocName> newLocName = LocName.Create(command.Location.Name);
 
-            var newLocAdress = LocAdress.Create(
+            Result<LocAdress> newLocAdress = LocAdress.Create(
                 command.Location.Adress.City,
                 command.Location.Adress.Street,
                 command.Location.Adress.Building,
                 command.Location.Adress.Room);
 
-            var newTimeZone = LocTimezone.Create(command.Location.Timezone);
+            Result<LocTimezone> newTimeZone = LocTimezone.Create(command.Location.Timezone);
 
             Result<Location> locResult = Location.Create(
-                newLocName.Value,
-                newLocAdress.Value,
-                newTimeZone.Value,
+                newLocName,
+                newLocAdress,
+                newTimeZone,
                 command.Location.isActive);
 
-            var newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
+            Result<Guid> newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
 
             if (newLocation.IsFailure)
             {
@@ -56,9 +56,9 @@ namespace DirectoryServices.Application.Locations.CreateLocation
                 return newLocation.Error!;
             }
 
-            _logger.LogInformation("Создана локация с id {newLocation.Value.Id.Value}", newLocation.Value.Id.Value);
+            _logger.LogInformation("Создана локация с id {newLocation.Value}", newLocation.Value);
 
-            return newLocation.Value;
+            return newLocation;
         }
     }
 }

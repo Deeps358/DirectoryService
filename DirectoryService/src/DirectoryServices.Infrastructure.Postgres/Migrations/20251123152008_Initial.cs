@@ -18,19 +18,19 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     identifier = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    parentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    parent_id = table.Column<Guid>(type: "uuid", nullable: true),
                     path = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     depth = table.Column<short>(type: "smallint", nullable: false),
-                    isActive = table.Column<bool>(type: "boolean", nullable: false),
-                    createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_departaments", x => x.id);
                     table.ForeignKey(
-                        name: "FK_departaments_departaments_parentId",
-                        column: x => x.parentId,
+                        name: "FK_departaments_departaments_parent_id",
+                        column: x => x.parent_id,
                         principalTable: "departaments",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -43,9 +43,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     timezone = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    isActive = table.Column<bool>(type: "boolean", nullable: false),
-                    createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     adress = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
@@ -60,9 +60,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    isActive = table.Column<bool>(type: "boolean", nullable: false),
-                    createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -144,9 +144,21 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                 column: "position_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_departaments_parentId",
+                name: "IX_departaments_parent_id",
                 table: "departaments",
-                column: "parentId");
+                column: "parent_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_locations_name",
+                table: "locations",
+                column: "name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_positions_name",
+                table: "positions",
+                column: "name",
+                unique: true);
         }
 
         /// <inheritdoc />
