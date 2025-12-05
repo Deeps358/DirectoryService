@@ -1,7 +1,6 @@
 ﻿using DirectoryServices.Application.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
-using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
