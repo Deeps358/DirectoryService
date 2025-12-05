@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using Npgsql;
 using Shared.ResultPattern;
-using System.Xml.Linq;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
 {
@@ -28,8 +27,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             try
             {
                 var addedPosition = await _dbContext.Positions.AddAsync(position, cancellationToken);
-
-                await _dbContext.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("В базу добавлена новая позиция с Id = {addedPosition.Entity.Id.Value}", addedPosition.Entity.Id.Value);
                 return position.Id.Value;

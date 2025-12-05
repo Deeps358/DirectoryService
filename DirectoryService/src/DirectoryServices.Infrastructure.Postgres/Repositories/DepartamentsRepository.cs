@@ -26,8 +26,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             {
                 var addedDepartament = await _dbContext.Departaments.AddAsync(departament, cancellationToken); // сохраняем деп
 
-                await _dbContext.SaveChangesAsync();
-
                 _logger.LogInformation("В базу добавлено новое подразделение с Id = {addedDepartament.Entity.Id.Value}", addedDepartament.Entity.Id.Value);
                 return departament.Id.Value;
             }

@@ -24,7 +24,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             try
             {
                 var addedLocation = await _dbContext.Locations.AddAsync(location, cancellationToken);
-                await _dbContext.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("В базу добавлена новая локация с Id = {addedLocation.Entity.Id.Value}", addedLocation.Entity.Id.Value);
 
