@@ -13,13 +13,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
             builder.ToTable("departament_locations");
 
             builder
-                .HasKey(dl => dl.Id)
+                .HasKey(dl => new { dl.DepartamentId, dl.LocationId })
                 .HasName("pk_departament_location");
-
-            builder
-                .Property(dl => dl.Id)
-                .IsRequired()
-                .HasColumnName("id");
 
             builder
                 .Property(dl => dl.DepartamentId)

@@ -73,7 +73,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                 name: "departament_locations",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     departament_id = table.Column<Guid>(type: "uuid", nullable: false),
                     location_id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -81,7 +80,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_departament_location", x => x.id);
+                    table.PrimaryKey("pk_departament_location", x => new { x.departament_id, x.location_id });
                     table.ForeignKey(
                         name: "FK_departament_locations_departaments_departament_id",
                         column: x => x.departament_id,
@@ -122,11 +121,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_departament_locations_departament_id",
-                table: "departament_locations",
-                column: "departament_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_departament_locations_location_id",

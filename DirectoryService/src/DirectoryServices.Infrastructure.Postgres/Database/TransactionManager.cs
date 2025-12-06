@@ -42,13 +42,14 @@ public class TransactionManager : ITransactionManager
     {
         try
         {
+            var tracker = _dbContext.ChangeTracker.Entries();
             await _dbContext.SaveChangesAsync(cancellationToken);
             return UnitResult.Success<Error>();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Не удалось сохранить транзакцию с изменениями");
-            return Error.Failure("database.transaction.save", ["Не удалось сохранить с изменениями"]);
+            return Error.Failure("database.transaction.save", ["Не удалось сохранить транзакцию с изменениями"]);
         }
     }
 }

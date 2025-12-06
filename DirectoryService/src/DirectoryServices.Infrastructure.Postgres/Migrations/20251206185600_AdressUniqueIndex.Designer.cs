@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DirectoryServices.Infrastructure.Postgres.Migrations
 {
     [DbContext(typeof(DirectoryServiceDbContext))]
-    [Migration("20251123152112_AdressUniqueIndex")]
+    [Migration("20251206185600_AdressUniqueIndex")]
     partial class AdressUniqueIndex
     {
         /// <inheritdoc />
@@ -61,14 +61,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("DirectoryServices.Entities.DepartmentLocation", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("DepartamentId")
                         .HasColumnType("uuid")
                         .HasColumnName("departament_id");
@@ -77,13 +69,14 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("location_id");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id")
+                    b.HasKey("DepartamentId", "LocationId")
                         .HasName("pk_departament_location");
-
-                    b.HasIndex("DepartamentId");
 
                     b.HasIndex("LocationId");
 

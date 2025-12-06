@@ -64,6 +64,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 string stringIds = string.Join(", ", ids);
 
                 _logger.LogInformation("Получены подразделения с id = {stringIds}", stringIds);
+
                 return receivedDepartaments;
             }
             catch (Exception ex)
@@ -72,6 +73,15 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
                 return Error.Failure("departament.incorrect.DB", ["Ошибка при получении депов из базы"]);
             }
+        }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken)
+        {
+            int delAs = await _dbContext.DepartmentLocations
+                .Where(dl => dl.DepartamentId == depId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
     }
 }
