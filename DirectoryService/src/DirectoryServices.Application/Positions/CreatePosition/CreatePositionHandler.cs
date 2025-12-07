@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Application.Database;
 using DirectoryServices.Application.Departaments;
 using DirectoryServices.Contracts.Positions;
 using DirectoryServices.Entities;
@@ -12,17 +13,20 @@ namespace DirectoryServices.Application.Positions.CreatePosition
 {
     public class CreatePositionHandler : ICommandHandler<Guid, CreatePositionCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly IPositionsRepository _positionsRepository;
         private readonly IDepartamentsRepository _departamentsRepository;
         private readonly IValidator<CreatePositionDto> _validator;
         private readonly ILogger<CreatePositionHandler> _logger;
 
         public CreatePositionHandler(
+            ITransactionManager transactionManager,
             IPositionsRepository positionsRepository,
             IDepartamentsRepository departamentsRepository,
             IValidator<CreatePositionDto> validator,
             ILogger<CreatePositionHandler> logger)
         {
+            _transactionManager = transactionManager;
             _positionsRepository = positionsRepository;
             _departamentsRepository = departamentsRepository;
             _validator = validator;
@@ -40,21 +44,18 @@ namespace DirectoryServices.Application.Positions.CreatePosition
             PosId newPosId = PosId.NewPosId();
             PosName newPosName = PosName.Create(command.Position.Name);
 
-            /*Result<Position> checkPosName = await _positionsRepository.GetByNameAsync(newPosName, cancellationToken);
-            if (checkPosName.IsFailure)
-            {
-                return checkPosName.Error;
-            }
-
-            if (checkPosName.Value != null)
-            {
-                return Error.Conflict("position.duplicate.name", ["Такое имя позиции уже есть!"]);
-            }*/
-
             PosDescription newPosDesc = PosDescription.Create(command.Position.Description).Value;
 
             // проверка на существующие депы
             List<DepartmentPosition> depPositions = new List<DepartmentPosition>();
+
+            Result<ITransactionScope> transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken); // открытие транзакции
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Error;
+            }
+
+            using ITransactionScope transactionScope = transactionScopeResult.Value;
 
             Result<Departament[]> departaments = await _departamentsRepository.GetByIdAsync(
                 command.Position.DepartmentIds.Distinct().ToArray(),
@@ -62,6 +63,7 @@ namespace DirectoryServices.Application.Positions.CreatePosition
 
             if (departaments.IsFailure)
             {
+                transactionScope.Rollback();
                 return departaments.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -82,8 +84,18 @@ namespace DirectoryServices.Application.Positions.CreatePosition
             Result<Guid> newPos = await _positionsRepository.CreateAsync(posResult, cancellationToken);
             if (newPos.IsFailure)
             {
+                transactionScope.Rollback();
                 _logger.LogInformation($"Ошибка записи в базу: {newPos.Error}");
                 return newPos.Error;
+            }
+
+            await _transactionManager.SaveChangesAsync(cancellationToken);
+
+            var commitedResult = transactionScope.Commit();
+            if (commitedResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return commitedResult.Error;
             }
 
             _logger.LogInformation("Создана позиция с id {newPos.Value}", newPos.Value);

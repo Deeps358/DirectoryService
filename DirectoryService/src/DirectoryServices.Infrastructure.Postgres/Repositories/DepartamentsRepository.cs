@@ -1,7 +1,6 @@
 ﻿using DirectoryServices.Application.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
-using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
@@ -26,8 +25,6 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             try
             {
                 var addedDepartament = await _dbContext.Departaments.AddAsync(departament, cancellationToken); // сохраняем деп
-
-                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation("В базу добавлено новое подразделение с Id = {addedDepartament.Entity.Id.Value}", addedDepartament.Entity.Id.Value);
                 return departament.Id.Value;
@@ -67,6 +64,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 string stringIds = string.Join(", ", ids);
 
                 _logger.LogInformation("Получены подразделения с id = {stringIds}", stringIds);
+
                 return receivedDepartaments;
             }
             catch (Exception ex)
@@ -75,6 +73,23 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
                 return Error.Failure("departament.incorrect.DB", ["Ошибка при получении депов из базы"]);
             }
+        }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken)
+        {
+            int delAs = await _dbContext.DepartmentLocations
+                .Where(dl => dl.DepartamentId == depId)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+        }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
+            List<DepartmentLocation> deplocs,
+            CancellationToken cancellationToken)
+        {
+            await _dbContext.DepartmentLocations.AddRangeAsync(deplocs, cancellationToken);
+            return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
     }
 }

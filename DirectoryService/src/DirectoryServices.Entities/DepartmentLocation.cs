@@ -12,18 +12,14 @@ namespace DirectoryServices.Entities
         }
 
         private DepartmentLocation(
-            Guid id,
             DepId depId,
             LocId locId)
         {
-            Id = id;
             DepartamentId = depId;
             LocationId = locId;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
         }
-
-        public Guid Id { get; private set; }
 
         public DepId DepartamentId { get; private set; } = null!;
 
@@ -37,7 +33,7 @@ namespace DirectoryServices.Entities
             DepId depId,
             LocId locId)
         {
-            var depLoc = new DepartmentLocation(Guid.NewGuid(), depId, locId);
+            var depLoc = new DepartmentLocation(depId, locId);
 
             return depLoc;
         }

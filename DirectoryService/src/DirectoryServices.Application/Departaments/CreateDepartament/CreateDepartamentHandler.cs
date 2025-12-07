@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Application.Database;
 using DirectoryServices.Application.Locations;
 using DirectoryServices.Contracts.Departaments;
 using DirectoryServices.Entities;
@@ -12,17 +13,20 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 {
     public class CreateDepartamentHandler : ICommandHandler<Guid, CreateDepartamentCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateDepartamentDto> _validator;
         private readonly ILogger<CreateDepartamentHandler> _logger;
 
         public CreateDepartamentHandler(
+            ITransactionManager transactionManager,
             IDepartamentsRepository departamentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<CreateDepartamentDto> validator,
             ILogger<CreateDepartamentHandler> logger)
         {
+            _transactionManager = transactionManager;
             _departamentsRepository = departamentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;
@@ -50,11 +54,20 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             Departament parent = null;
 
+            Result<ITransactionScope> transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken); // открытие транзакции
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Error;
+            }
+
+            using ITransactionScope transactionScope = transactionScopeResult.Value;
+
             if (command.Departament.ParentId.HasValue)
             {
                 Result<Departament[]> requestedParent = await _departamentsRepository.GetByIdAsync([command.Departament.ParentId.Value], cancellationToken);
                 if (requestedParent.IsFailure)
                 {
+                    transactionScope.Rollback();
                     return requestedParent.Error;
                 }
 
@@ -62,6 +75,7 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
                 if (parent.Identifier == newDepIdentifier)
                 {
+                    transactionScope.Rollback();
                     return Error.Conflict("departament.conflict.identifier", ["Идентификатор родителя и ребёнка не должны совпадать!"]);
                 }
             }
@@ -74,6 +88,7 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
 
             if (locations.IsFailure)
             {
+                transactionScope.Rollback();
                 return locations.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -97,8 +112,18 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
             Result<Guid> newDep = await _departamentsRepository.CreateAsync(depResult, cancellationToken);
             if (newDep.IsFailure)
             {
+                transactionScope.Rollback();
                 _logger.LogInformation($"Ошибка записи в базу: {newDep.Error}");
                 return newDep.Error;
+            }
+
+            await _transactionManager.SaveChangesAsync(cancellationToken);
+
+            var commitedResult = transactionScope.Commit();
+            if (commitedResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return commitedResult.Error;
             }
 
             _logger.LogInformation("Создано подразделение с id {newDep.Value}", newDep.Value);

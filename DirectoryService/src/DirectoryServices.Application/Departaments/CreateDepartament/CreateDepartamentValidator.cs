@@ -20,9 +20,6 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
                 .MaximumLength(LengthConstants.LENGTH_150).WithMessage("Идентификатор не может быть больше 150 символов!")
                 .Must(BeAValididentifier).WithMessage("В идентификаторе допускаются только латиница в нижнем регистре и дефисы");
 
-            /*RuleFor(x => x.ParentId)
-                .Must(BeAValidParentId).WithMessage();*/
-
             RuleFor(x => x.LocationsIds)
                 .NotEmpty().WithMessage("Должна быть указана хотя бы одна локация!");
         }
@@ -35,16 +32,6 @@ namespace DirectoryServices.Application.Departaments.CreateDepartament
             }
 
             return true;
-        }
-
-        private bool BeAValidParentId(object obj)
-        {
-            if (obj is Guid guid || obj is null)
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }

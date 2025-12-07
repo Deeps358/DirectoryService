@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Application.Database;
 using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Locations;
@@ -10,15 +11,18 @@ namespace DirectoryServices.Application.Locations.CreateLocation
 {
     public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
     {
+        private readonly ITransactionManager _transactionManager;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateLocationDto> _validator;
         private readonly ILogger<CreateLocationHandler> _logger;
 
         public CreateLocationHandler(
+            ITransactionManager transactionManager,
             ILocationsRepository locationsRepository,
             IValidator<CreateLocationDto> validator,
             ILogger<CreateLocationHandler> logger)
         {
+            _transactionManager = transactionManager;
             _locationsRepository = locationsRepository;
             _validator = validator;
             _logger = logger;
@@ -48,12 +52,30 @@ namespace DirectoryServices.Application.Locations.CreateLocation
                 newTimeZone,
                 command.Location.isActive);
 
+            Result<ITransactionScope> transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken); // открытие транзакции
+            if (transactionScopeResult.IsFailure)
+            {
+                return transactionScopeResult.Error;
+            }
+
+            using ITransactionScope transactionScope = transactionScopeResult.Value;
+
             Result<Guid> newLocation = await _locationsRepository.CreateAsync(locResult.Value, cancellationToken);
 
             if (newLocation.IsFailure)
             {
+                transactionScope.Rollback();
                 _logger.LogInformation($"Ошибка записи в базу: {newLocation.Error}");
                 return newLocation.Error!;
+            }
+
+            await _transactionManager.SaveChangesAsync(cancellationToken);
+
+            var commitedResult = transactionScope.Commit();
+            if (commitedResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return commitedResult.Error;
             }
 
             _logger.LogInformation("Создана локация с id {newLocation.Value}", newLocation.Value);

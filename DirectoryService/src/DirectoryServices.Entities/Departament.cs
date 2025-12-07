@@ -7,8 +7,8 @@ namespace DirectoryServices.Entities
     public partial class Departament
     {
         private readonly List<Departament> _childrens = [];
-        private readonly List<DepartmentLocation> _departamentLocations = [];
-        private readonly List<DepartmentPosition> _departamentPositions = [];
+        private readonly List<DepartmentLocation> _locations = [];
+        private readonly List<DepartmentPosition> _positions = [];
 
         private Departament()
         {
@@ -32,8 +32,8 @@ namespace DirectoryServices.Entities
             Path = path;
             Parent = parent;
             Depth = depth;
-            _departamentLocations = locations.ToList();
-            _departamentPositions = []/*positions.ToList()*/;
+            _locations = locations.ToList();
+            _positions = []/*positions.ToList()*/;
             IsActive = isActive;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
@@ -55,9 +55,9 @@ namespace DirectoryServices.Entities
 
         public short Depth { get; private set; }
 
-        public IReadOnlyList<DepartmentLocation> DepartamentLocations => _departamentLocations;
+        public IReadOnlyList<DepartmentLocation> Locations => _locations;
 
-        public IReadOnlyList<DepartmentPosition> DepartamentPositions => _departamentPositions;
+        public IReadOnlyList<DepartmentPosition> Positions => _positions;
 
         public bool IsActive { get; private set; }
 
@@ -120,16 +120,19 @@ namespace DirectoryServices.Entities
 
         public Result<Departament> AddLocations(IEnumerable<DepartmentLocation> locations)
         {
-            // проверка списка локаций
-            if (locations == null || !locations.Any())
-            {
-                return Error.Validation("departament.incorrect.locations", ["Список локаций не должен быть пустым!"]);
-            }
-
-            _departamentLocations.Concat(locations);
+            _locations.AddRange(locations);
             UpdatedAt = DateTime.UtcNow;
 
             return this;
+        }
+
+        public Result<Guid> UpdateLocations(IEnumerable<DepartmentLocation> locations)
+        {
+            _locations.Clear();
+            _locations.AddRange(locations.ToList());
+            UpdatedAt = DateTime.UtcNow;
+
+            return Id.Value;
         }
 
         public Result<Departament> AddPositions(IEnumerable<DepartmentPosition> positions)
@@ -140,7 +143,7 @@ namespace DirectoryServices.Entities
                 return Error.Validation("departament.incorrect.positions", ["Список позиций не должен быть пустым!"]);
             }
 
-            _departamentPositions.Concat(positions);
+            _positions.Concat(positions);
             UpdatedAt = DateTime.UtcNow;
 
             return this;

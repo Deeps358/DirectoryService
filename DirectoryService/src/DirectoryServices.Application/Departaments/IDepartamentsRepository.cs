@@ -9,5 +9,11 @@ namespace DirectoryServices.Application.Departaments
         Task<Result<Guid>> CreateAsync(Departament departament, CancellationToken cancellationToken);
 
         Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
+
+        Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
+            List<DepartmentLocation> deplocs,
+            CancellationToken cancellationToken);
+
+        Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken);
     }
 }
