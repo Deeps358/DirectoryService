@@ -55,9 +55,9 @@ namespace DirectoryServices.Entities
 
         public short Depth { get; private set; }
 
-        public IReadOnlyList<DepartmentLocation> DepartamentLocations => _locations;
+        public IReadOnlyList<DepartmentLocation> Locations => _locations;
 
-        public IReadOnlyList<DepartmentPosition> DepartamentPositions => _positions;
+        public IReadOnlyList<DepartmentPosition> Positions => _positions;
 
         public bool IsActive { get; private set; }
 

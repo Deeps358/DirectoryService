@@ -83,5 +83,13 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
             return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
+            List<DepartmentLocation> deplocs,
+            CancellationToken cancellationToken)
+        {
+            await _dbContext.DepartmentLocations.AddRangeAsync(deplocs, cancellationToken);
+            return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+        }
     }
 }

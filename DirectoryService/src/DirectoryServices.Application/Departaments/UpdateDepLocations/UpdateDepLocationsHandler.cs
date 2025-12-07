@@ -1,4 +1,4 @@
-using DirectoryServices.Application.Abstractions;
+﻿using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Application.Locations;
 using DirectoryServices.Contracts.Departaments;
@@ -61,7 +61,6 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
 
             if (locations.IsFailure)
             {
-                transactionScope.Rollback();
                 return locations.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -73,7 +72,6 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
 
             if(depResult.IsFailure)
             {
-                transactionScope.Rollback();
                 return depResult.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -92,19 +90,17 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
                 deplocs.Add(DepartmentLocation.Create(departament.Id, LocId.GetCurrent(locationId)));
             }
 
-            departament.UpdateLocations(deplocs);
+            await _departamentsRepository.AddDepLocationsRelationsAsync(deplocs, cancellationToken); // добавление новых связей без change tracker
 
             var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if (saveResult.IsFailure)
             {
-                transactionScope.Rollback();
                 return saveResult.Error;
             }
 
             CSharpFunctionalExtensions.UnitResult<Error> commitedResult = transactionScope.Commit();
             if (commitedResult.IsFailure)
             {
-                transactionScope.Rollback();
                 return commitedResult.Error;
             }
 

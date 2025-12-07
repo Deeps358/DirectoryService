@@ -70,11 +70,11 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                 .IsRequired()
                 .HasColumnName("updated_at");
 
-            builder.HasMany(d => d.DepartamentLocations)
+            builder.HasMany(d => d.Locations)
                 .WithOne()
                 .HasForeignKey(d => d.DepartamentId);
 
-            builder.HasMany(d => d.DepartamentPositions)
+            builder.HasMany(d => d.Positions)
                 .WithOne()
                 .HasForeignKey(d => d.DepartamentId);
         }
