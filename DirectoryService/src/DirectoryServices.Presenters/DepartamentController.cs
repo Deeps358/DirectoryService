@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Application.Departaments.ChangeParent;
 using DirectoryServices.Application.Departaments.CreateDepartament;
 using DirectoryServices.Application.Departaments.UpdateDepLocations;
 using DirectoryServices.Contracts.Departaments;
@@ -47,6 +48,22 @@ namespace DirectoryServices.Presenters
             CancellationToken cancellationToken)
         {
             var command = new UpdateDepLocationsCommand(departmentId, updateDepLocationsDto);
+            return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpPut("{departmentId}/parent")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<EndpointResult<Guid>> ChangeParent(
+            [FromRoute] Guid departmentId,
+            [FromServices] ICommandHandler<Guid, ChangeParentCommand> handler,
+            [FromBody] ChangeParentDto updateDepLocationsDto,
+            CancellationToken cancellationToken)
+        {
+            var command = new ChangeParentCommand(departmentId, updateDepLocationsDto);
             return await handler.Handle(command, cancellationToken);
         }
     }
