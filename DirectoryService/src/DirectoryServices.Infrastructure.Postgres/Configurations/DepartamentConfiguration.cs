@@ -46,13 +46,16 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                 .IsRequired(false)
                 .HasColumnName("parent_id");
 
-            builder.OwnsOne(d => d.Path, pb =>
-            {
-                pb.Property(p => p.Value)
-                    .IsRequired()
-                    .HasMaxLength(LengthConstants.LENGTH_150)
-                    .HasColumnName("path");
-            });
+            builder.Property(d => d.Path)
+                .IsRequired()
+                .HasMaxLength(LengthConstants.LENGTH_150)
+                .HasColumnName("path")
+                .HasColumnType("ltree")
+                .HasConversion(
+                    value => value.Value,
+                    value => DepPath.Create(null, DepIdentifier.Create(value)));
+
+            builder.HasIndex(x => x.Path).HasMethod("gist").HasDatabaseName("idx_departaments_path");
 
             builder.Property(d => d.Depth)
                 .IsRequired()

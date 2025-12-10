@@ -73,6 +73,20 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
                 parent = parentDepResult.Value[0];
             }
 
+            /* и ещё проверка что родителем указан не один из дочерних элементов ребёнка */
+
+            /*
+            * если путь родителя входит в путь ребёнка с 0 индекса
+            * а у родителя ещё что-то остаётся в пути
+            * значит родитель это дочерний элемент ребёнка
+            */
+            if (parent != null && parent.Path.Value.IndexOf(child.Path.Value) == 0)
+            {
+                return Error.Validation(
+                    "departament.change_parent.child_parent_check",
+                    ["Подразделение не может быть перенесено в своё дочернее подразделение!"]);
+            }
+
             /* теперь надо поменять путь у всех детей через репозиторий */
 
             return child.Id.Value;
