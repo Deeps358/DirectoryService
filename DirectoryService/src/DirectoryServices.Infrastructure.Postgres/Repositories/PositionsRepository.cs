@@ -28,6 +28,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             {
                 var addedPosition = await _dbContext.Positions.AddAsync(position, cancellationToken);
 
+                await _dbContext.SaveChangesAsync();
+
                 _logger.LogInformation("В базу добавлена новая позиция с Id = {addedPosition.Entity.Id.Value}", addedPosition.Entity.Id.Value);
                 return position.Id.Value;
             }

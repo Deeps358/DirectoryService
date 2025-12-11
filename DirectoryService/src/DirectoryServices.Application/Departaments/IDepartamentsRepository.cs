@@ -15,5 +15,7 @@ namespace DirectoryServices.Application.Departaments
             CancellationToken cancellationToken);
 
         Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken);
+
+        Task<Result<int>> ChangeParent(string depPath, string curParentPath, string newPath, Guid? parentId, CancellationToken cancellationToken);
     }
 }

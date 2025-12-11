@@ -57,9 +57,9 @@ namespace DirectoryServices.Presenters
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<EndpointResult<Guid>> ChangeParent(
+        public async Task<EndpointResult<int>> ChangeParent(
             [FromRoute] Guid departmentId,
-            [FromServices] ICommandHandler<Guid, ChangeParentCommand> handler,
+            [FromServices] ICommandHandler<int, ChangeParentCommand> handler,
             [FromBody] ChangeParentDto updateDepLocationsDto,
             CancellationToken cancellationToken)
         {

@@ -3,6 +3,7 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
@@ -63,6 +64,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
                 string stringIds = string.Join(", ", ids);
 
+                await _dbContext.SaveChangesAsync();
+
                 _logger.LogInformation("Получены подразделения с id = {stringIds}", stringIds);
 
                 return receivedDepartaments;
@@ -90,6 +93,39 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
         {
             await _dbContext.DepartmentLocations.AddRangeAsync(deplocs, cancellationToken);
             return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+        }
+
+        public async Task<Result<int>> ChangeParent(string depPath, string curParentPath, string newPath, Guid? parentId, CancellationToken cancellationToken)
+        {
+            FormattableString sql = $"""
+            UPDATE departaments
+            SET path = 
+                    {newPath}::ltree ||
+                    CASE
+                        WHEN nlevel(path) > nlevel({curParentPath}::ltree)
+                        THEN subpath(path, nlevel({curParentPath}::ltree))
+                        ELSE ''::ltree
+                    END,
+                depth = nlevel(
+                    {newPath}::ltree ||
+                    CASE
+                        WHEN nlevel(path) > nlevel({curParentPath}::ltree)
+                        THEN subpath(path, nlevel({curParentPath}::ltree))
+                        ELSE ''::ltree
+                    END
+                ) - 1,
+                parent_id = 
+                    CASE
+                        WHEN path = {depPath}::ltree
+                        THEN {parentId}
+                        ELSE parent_id
+                    END
+            WHERE path <@ {depPath}::ltree;
+            """;
+
+            int affectedRows = await _dbContext.Database.ExecuteSqlAsync(sql);
+
+            return affectedRows;
         }
     }
 }

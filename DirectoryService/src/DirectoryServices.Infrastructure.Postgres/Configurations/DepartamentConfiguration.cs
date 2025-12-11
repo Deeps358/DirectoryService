@@ -52,8 +52,8 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                 .HasColumnName("path")
                 .HasColumnType("ltree")
                 .HasConversion(
-                    value => value.Value,
-                    value => DepPath.Create(null, DepIdentifier.Create(value)));
+                    toBase => toBase.Value,
+                    toUs => DepPath.GetCurrent(toUs));
 
             builder.HasIndex(x => x.Path).HasMethod("gist").HasDatabaseName("idx_departaments_path");
 

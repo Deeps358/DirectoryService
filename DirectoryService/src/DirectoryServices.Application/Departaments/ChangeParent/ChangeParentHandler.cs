@@ -6,7 +6,7 @@ using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Departaments.ChangeParent
 {
-    public class ChangeParentHandler : ICommandHandler<Guid, ChangeParentCommand>
+    public class ChangeParentHandler : ICommandHandler<int, ChangeParentCommand>
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
@@ -22,7 +22,7 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> Handle(ChangeParentCommand command, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(ChangeParentCommand command, CancellationToken cancellationToken)
         {
             /* открываем транзакцию */
 
@@ -89,7 +89,37 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
 
             /* теперь надо поменять путь у всех детей через репозиторий */
 
-            return child.Id.Value;
+            int index = child.Path.Value.LastIndexOf('.');
+            int countToRemove = child.Path.Value.Length - index;
+            string curParentPath =
+                index == -1
+                ? string.Empty
+                : child.Path.Value.Remove(index, countToRemove); // получу так чтоб не делать ещё запрос в БД на родителя
+
+            var affectedRows = await _departamentsRepository.ChangeParent(
+                child.Path.Value,
+                curParentPath,
+                parent?.Path.Value ?? string.Empty,
+                command.NewParent.ParentId,
+                cancellationToken);
+
+            CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if(saveResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return saveResult.Error;
+            }
+
+            var commitedResult = transactionScope.Commit();
+            if (commitedResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return commitedResult.Error;
+            }
+
+            _logger.LogInformation("У подразделения с id {child.Id.Value} изменился родитель. Всего изменён путь у {affectedRows} подразделений", child.Id.Value, affectedRows);
+
+            return affectedRows;
         }
     }
 }

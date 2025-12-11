@@ -26,5 +26,10 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
 
             return new DepPath(path);
         }
+
+        public static Result<DepPath> GetCurrent(string depPath)
+        {
+            return new DepPath(depPath);
+        }
     }
 }
