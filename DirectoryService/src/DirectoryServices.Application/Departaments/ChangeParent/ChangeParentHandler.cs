@@ -45,32 +45,38 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
             Departament parent = null;
             Departament child = null;
 
-            // далее проверю ребёнка и родителя 2 запросами, я не знаю в каком порядке БД выдаст мне массив сущностей
-            Result<Departament[]> childDepResult = await _departamentsRepository.GetByIdAsync(
-                [command.DepId],
-                cancellationToken);
+            // далее проверю ребёнка и родителя 2 запросами с блокировкой, я не знаю в каком порядке БД выдаст мне массив сущностей
+            Result<Departament> childDepResult = await _departamentsRepository.GetByIdWithLockAsync(command.DepId, cancellationToken);
 
             if (childDepResult.IsFailure)
             {
                 transactionScope.Rollback();
-                return childDepResult.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
+                return childDepResult.Error; // тут могут вернуться как ошибка чтения из БД так и просто не найдено
             }
 
-            child = childDepResult.Value[0];
+            child = childDepResult.Value;
+
+            /* заблокирую ещё всех детей депа чтоб их не трогали */
+
+            Result<Departament[]> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(child.Path, cancellationToken);
+
+            if(getChildrensResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return getChildrensResult.Error;
+            }
 
             if (command.NewParent.ParentId.HasValue) // родителя может и не быть, не забыть
             {
-                Result<Departament[]> parentDepResult = await _departamentsRepository.GetByIdAsync(
-                [command.NewParent.ParentId.Value],
-                cancellationToken);
+                Result<Departament> parentDepResult = await _departamentsRepository.GetByIdWithLockAsync(command.NewParent.ParentId.Value, cancellationToken);
 
                 if (parentDepResult.IsFailure)
                 {
                     transactionScope.Rollback();
-                    return parentDepResult.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
+                    return parentDepResult.Error; // тут могут вернуться как ошибка чтения из БД так и просто не найдено
                 }
 
-                parent = parentDepResult.Value[0];
+                parent = parentDepResult.Value;
             }
 
             /* и ещё проверка что родителем указан не один из дочерних элементов ребёнка */
@@ -82,6 +88,7 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
             */
             if (parent != null && parent.Path.Value.IndexOf(child.Path.Value) == 0)
             {
+                transactionScope.Rollback();
                 return Error.Validation(
                     "departament.change_parent.child_parent_check",
                     ["Подразделение не может быть перенесено в своё дочернее подразделение!"]);
@@ -96,12 +103,18 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
                 ? string.Empty
                 : child.Path.Value.Remove(index, countToRemove); // получу так чтоб не делать ещё запрос в БД на родителя
 
-            var affectedRows = await _departamentsRepository.ChangeParent(
+            Result<int> affectedRowsResult = await _departamentsRepository.ChangeParent(
                 child.Path.Value,
                 curParentPath,
                 parent?.Path.Value ?? string.Empty,
                 command.NewParent.ParentId,
                 cancellationToken);
+
+            if (affectedRowsResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return affectedRowsResult.Error;
+            }
 
             CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if(saveResult.IsFailure)
@@ -113,13 +126,12 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
             var commitedResult = transactionScope.Commit();
             if (commitedResult.IsFailure)
             {
-                transactionScope.Rollback();
                 return commitedResult.Error;
             }
 
-            _logger.LogInformation("У подразделения с id {child.Id.Value} изменился родитель. Всего изменён путь у {affectedRows} подразделений", child.Id.Value, affectedRows);
+            _logger.LogInformation("У подразделения с id {child.Id.Value} изменился родитель. Всего изменён путь у {affectedRows} подразделений", child.Id.Value, affectedRowsResult);
 
-            return affectedRows;
+            return affectedRowsResult;
         }
     }
 }

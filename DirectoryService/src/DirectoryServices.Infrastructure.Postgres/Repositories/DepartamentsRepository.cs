@@ -58,7 +58,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 if (missingIds.Length > 0) // нашли не всё что дали на вход
                 {
                     string stringMissedIds = string.Join(", ", missingIds);
-                    _logger.LogInformation("Департаменты с id = {missingIds} не найден!", stringMissedIds);
+                    _logger.LogInformation("Департаменты с id = {stringMissedIds} не найден!", stringMissedIds);
                     return Error.NotFound("departament.not_found.ids", [$"Департаменты с id = {stringMissedIds} не найдены!"]);
                 }
 
@@ -78,6 +78,21 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
+        public async Task<Result<Departament>> GetByIdWithLockAsync(Guid id, CancellationToken cancellationToken)
+        {
+            Departament? dep = await _dbContext.Departaments
+                .FromSql($"SELECT * FROM departaments WHERE id = {id} AND is_active FOR UPDATE")
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (dep == null)
+            {
+                _logger.LogInformation("Департамент с id_with_lock = {id} не найден!", id);
+                return Error.NotFound("departament.not_found.id_with_lock", [$"Департамент с id = {id} не найден!"]);
+            }
+
+            return dep;
+        }
+
         public async Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken)
         {
             int delAs = await _dbContext.DepartmentLocations
@@ -95,37 +110,67 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
 
+        public async Task<Result<Departament[]>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                FormattableString sql = $"""
+                SELECT * FROM departaments WHERE path <@ {depPath.Value}::ltree ORDER BY depth FOR UPDATE 
+                """;
+
+                Departament[] childDeps = await _dbContext.Departaments.FromSql(sql).ToArrayAsync(cancellationToken);
+
+                _logger.LogInformation("Получены дочерние подразделения с путём = {depPath.Value}", depPath.Value);
+
+                return childDeps;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении дочерних депов с путём = {depPath.Value}", depPath.Value);
+
+                return Error.Failure("departament.DB.childrens", ["Ошибка при получении дочерних депов из базы"]);
+            }
+        }
+
         public async Task<Result<int>> ChangeParent(string depPath, string curParentPath, string newPath, Guid? parentId, CancellationToken cancellationToken)
         {
-            FormattableString sql = $"""
-            UPDATE departaments
-            SET path = 
-                    {newPath}::ltree ||
-                    CASE
-                        WHEN nlevel(path) > nlevel({curParentPath}::ltree)
-                        THEN subpath(path, nlevel({curParentPath}::ltree))
-                        ELSE ''::ltree
-                    END,
-                depth = nlevel(
-                    {newPath}::ltree ||
-                    CASE
-                        WHEN nlevel(path) > nlevel({curParentPath}::ltree)
-                        THEN subpath(path, nlevel({curParentPath}::ltree))
-                        ELSE ''::ltree
-                    END
-                ) - 1,
-                parent_id = 
-                    CASE
-                        WHEN path = {depPath}::ltree
-                        THEN {parentId}
-                        ELSE parent_id
-                    END
-            WHERE path <@ {depPath}::ltree;
-            """;
+            try
+            {
+                FormattableString sql = $"""
+                UPDATE departaments
+                SET path = 
+                        {newPath}::ltree ||
+                        CASE
+                            WHEN nlevel(path) > nlevel({curParentPath}::ltree)
+                            THEN subpath(path, nlevel({curParentPath}::ltree))
+                            ELSE ''::ltree
+                        END,
+                    depth = nlevel(
+                        {newPath}::ltree ||
+                        CASE
+                            WHEN nlevel(path) > nlevel({curParentPath}::ltree)
+                            THEN subpath(path, nlevel({curParentPath}::ltree))
+                            ELSE ''::ltree
+                        END
+                    ) - 1,
+                    parent_id = 
+                        CASE
+                            WHEN path = {depPath}::ltree
+                            THEN {parentId}
+                            ELSE parent_id
+                        END
+                WHERE path <@ {depPath}::ltree;
+                """;
 
-            int affectedRows = await _dbContext.Database.ExecuteSqlAsync(sql);
+                int affectedRows = await _dbContext.Database.ExecuteSqlAsync(sql);
 
-            return affectedRows;
+                return affectedRows;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при перемещении депов");
+                return Error.Failure("departament.DB.move", ["Ошибка в базе при перемещении подразделений"]);
+            }
         }
     }
 }

@@ -10,6 +10,10 @@ namespace DirectoryServices.Application.Departaments
 
         Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
 
+        Task<Result<Departament>> GetByIdWithLockAsync(Guid id, CancellationToken cancellationToken);
+
+        Task<Result<Departament[]>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken);
+
         Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
             List<DepartmentLocation> deplocs,
             CancellationToken cancellationToken);
