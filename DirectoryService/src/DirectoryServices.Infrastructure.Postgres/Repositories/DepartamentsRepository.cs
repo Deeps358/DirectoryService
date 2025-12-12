@@ -3,7 +3,6 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
@@ -110,7 +109,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
 
-        public async Task<Result<Departament[]>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken)
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken)
         {
             try
             {
@@ -122,7 +121,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
 
                 _logger.LogInformation("Получены дочерние подразделения с путём = {depPath.Value}", depPath.Value);
 
-                return childDeps;
+                return CSharpFunctionalExtensions.UnitResult.Success<Error>();
             }
             catch (Exception ex)
             {
@@ -132,34 +131,23 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<Result<int>> ChangeParent(string depPath, string curParentPath, string newPath, Guid? parentId, CancellationToken cancellationToken)
+        public async Task<Result<int>> MoveDepWithChildernsAsync(DepPath depPath, DepPath curParentPath, DepPath? newPath, DepId? parentId, CancellationToken cancellationToken)
         {
             try
             {
                 FormattableString sql = $"""
                 UPDATE departaments
                 SET path = 
-                        {newPath}::ltree ||
-                        CASE
-                            WHEN nlevel(path) > nlevel({curParentPath}::ltree)
-                            THEN subpath(path, nlevel({curParentPath}::ltree))
-                            ELSE ''::ltree
-                        END,
-                    depth = nlevel(
-                        {newPath}::ltree ||
-                        CASE
-                            WHEN nlevel(path) > nlevel({curParentPath}::ltree)
-                            THEN subpath(path, nlevel({curParentPath}::ltree))
-                            ELSE ''::ltree
-                        END
-                    ) - 1,
+                        {newPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree)),
+                    depth = 
+                        nlevel({newPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree))) - 1,
                     parent_id = 
                         CASE
-                            WHEN path = {depPath}::ltree
-                            THEN {parentId}
+                            WHEN path = {depPath.Value}::ltree
+                            THEN {parentId?.Value}
                             ELSE parent_id
                         END
-                WHERE path <@ {depPath}::ltree;
+                WHERE path <@ {depPath.Value}::ltree;
                 """;
 
                 int affectedRows = await _dbContext.Database.ExecuteSqlAsync(sql);

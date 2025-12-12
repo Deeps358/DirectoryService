@@ -1,6 +1,7 @@
 using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -58,7 +59,7 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
 
             /* заблокирую ещё всех детей депа чтоб их не трогали */
 
-            Result<Departament[]> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(child.Path, cancellationToken);
+            CSharpFunctionalExtensions.UnitResult<Error> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(child.Path, cancellationToken);
 
             if(getChildrensResult.IsFailure)
             {
@@ -103,11 +104,11 @@ namespace DirectoryServices.Application.Departaments.ChangeParent
                 ? string.Empty
                 : child.Path.Value.Remove(index, countToRemove); // получу так чтоб не делать ещё запрос в БД на родителя
 
-            Result<int> affectedRowsResult = await _departamentsRepository.ChangeParent(
-                child.Path.Value,
-                curParentPath,
-                parent?.Path.Value ?? string.Empty,
-                command.NewParent.ParentId,
+            Result<int> affectedRowsResult = await _departamentsRepository.MoveDepWithChildernsAsync(
+                child.Path,
+                DepPath.GetCurrent(curParentPath),
+                parent?.Path,
+                command.NewParent.ParentId.HasValue ? DepId.GetCurrent(command.NewParent.ParentId.Value) : null,
                 cancellationToken);
 
             if (affectedRowsResult.IsFailure)
