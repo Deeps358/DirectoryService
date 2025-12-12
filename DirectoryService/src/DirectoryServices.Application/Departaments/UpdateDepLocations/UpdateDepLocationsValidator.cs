@@ -8,6 +8,7 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
         public UpdateDepLocationsValidator()
         {
             RuleFor(x => x.LocationsIds)
+                .NotNull().WithMessage("Массив с локациями должен быть!")
                 .NotEmpty().WithMessage("Должна быть указана хотя бы одна локация!");
         }
     }

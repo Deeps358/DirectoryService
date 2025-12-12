@@ -10,10 +10,16 @@ namespace DirectoryServices.Application.Departaments
 
         Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
 
+        Task<Result<Departament>> GetByIdWithLockAsync(Guid id, CancellationToken cancellationToken);
+
+        Task<CSharpFunctionalExtensions.UnitResult<Error>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken);
+
         Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
             List<DepartmentLocation> deplocs,
             CancellationToken cancellationToken);
 
         Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken);
+
+        Task<Result<int>> MoveDepWithChildernsAsync(DepPath depPath, DepPath curParentPath, DepPath newPath, DepId? parentId, CancellationToken cancellationToken);
     }
 }

@@ -61,6 +61,7 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
 
             if (locations.IsFailure)
             {
+                transactionScope.Rollback();
                 return locations.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -72,6 +73,7 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
 
             if(depResult.IsFailure)
             {
+                transactionScope.Rollback();
                 return depResult.Error; // тут могут вернуться как ошибка записи из БД так и просто не найдено
             }
 
@@ -95,6 +97,7 @@ namespace DirectoryServices.Application.Departaments.UpdateDepLocations
             var saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if (saveResult.IsFailure)
             {
+                transactionScope.Rollback();
                 return saveResult.Error;
             }
 

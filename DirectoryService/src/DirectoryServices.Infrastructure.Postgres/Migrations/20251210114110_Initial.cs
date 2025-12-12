@@ -11,6 +11,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:ltree", ",,");
+
             migrationBuilder.CreateTable(
                 name: "departaments",
                 columns: table => new
@@ -19,7 +22,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Migrations
                     name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     identifier = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     parent_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    path = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    path = table.Column<string>(type: "ltree", maxLength: 150, nullable: false),
                     depth = table.Column<short>(type: "smallint", nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

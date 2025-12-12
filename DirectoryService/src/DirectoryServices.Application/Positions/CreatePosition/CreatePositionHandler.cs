@@ -89,7 +89,12 @@ namespace DirectoryServices.Application.Positions.CreatePosition
                 return newPos.Error;
             }
 
-            await _transactionManager.SaveChangesAsync(cancellationToken);
+            CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if(saveResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return saveResult.Error;
+            }
 
             var commitedResult = transactionScope.Commit();
             if (commitedResult.IsFailure)
