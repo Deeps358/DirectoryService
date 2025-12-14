@@ -21,6 +21,7 @@ namespace DirectoryServices.Infrastructure.Postgres
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("ltree");
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(DirectoryServiceDbContext).Assembly);
         }
 
