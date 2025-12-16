@@ -37,23 +37,23 @@ namespace DirectoryService.IntegrationTests.Common
             IEnumerable<DepartmentLocation> locations,
             IEnumerable<DepartmentPosition> positions,
             bool isActive)
-    {
-        return await ExecuteInDb(async dbContext =>
         {
-            Departament departament = Departament.Create(
-                depId,
-                depName,
-                depIdentifier,
-                parent,
-                locations,
-                positions,
-                isActive);
+            return await ExecuteInDb(async dbContext =>
+            {
+                Departament departament = Departament.Create(
+                    depId,
+                    depName,
+                    depIdentifier,
+                    parent,
+                    locations,
+                    positions,
+                    isActive);
 
-            dbContext.Departaments.Add(departament);
-            await dbContext.SaveChangesAsync();
+                dbContext.Departaments.Add(departament);
+                await dbContext.SaveChangesAsync();
 
-            return departament.Id;
-        });
-    }
+                return departament.Id;
+            });
+        }
     }
 }
