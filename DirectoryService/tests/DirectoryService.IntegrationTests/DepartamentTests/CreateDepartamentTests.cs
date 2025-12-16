@@ -1,4 +1,5 @@
 ﻿using DirectoryService.IntegrationTests.Infrastructure;
+using DirectoryService.IntegrationTests.Common;
 using DirectoryServices.Application.Departaments.CreateDepartament;
 using DirectoryServices.Contracts.Departaments;
 using DirectoryServices.Entities;
@@ -12,16 +13,19 @@ namespace DirectoryService.IntegrationTests.DepartamentTests;
 
 public class CreateDepartamentTests : DirectoryBaseTests
 {
+    private AddToBase _addToBase;
+
     public CreateDepartamentTests(DirectoryTestWebFactory factory)
         : base(factory)
     {
+        _addToBase = new AddToBase(factory);
     }
 
     [Fact]
     public async Task CreateDepartament_with_valid_data_should_succeed()
     {
         // arrange
-        LocId locId = await AddLocationToBase(
+        LocId locId = await _addToBase.AddLocationToBase(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
@@ -61,13 +65,13 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_duplicate_name_should_fail()
     {
         // arrange
-        LocId locId = await AddLocationToBase(
+        LocId locId = await _addToBase.AddLocationToBase(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
-        DepId depId = await AddDepartamentToBase(
+        DepId depId = await _addToBase.AddDepartamentToBase(
             DepId.NewDepId(),
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
@@ -84,7 +88,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
             var command = new CreateDepartamentCommand(
                 new CreateDepartamentDto(
                     "Director",
-                    "dir",
+                    "direc",
                     null,
                     [locId.Value],
                     true));
@@ -104,13 +108,13 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_duplicate_identifier_should_fail()
     {
         // arrange
-        LocId locId = await AddLocationToBase(
+        LocId locId = await _addToBase.AddLocationToBase(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
-        DepId depId = await AddDepartamentToBase(
+        DepId depId = await _addToBase.AddDepartamentToBase(
             DepId.NewDepId(),
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
@@ -140,50 +144,6 @@ public class CreateDepartamentTests : DirectoryBaseTests
         {
             result.IsSuccess.Should().BeFalse();
             result.Error.Message.Should().NotBeEmpty();
-        });
-    }
-
-    private async Task<LocId> AddLocationToBase(LocName locName, LocAdress locAdress, LocTimezone locTimezone, bool isActive)
-    {
-        return await ExecuteInDb(async dbContext =>
-        {
-            Location location = Location.Create(
-                locName,
-                locAdress,
-                locTimezone,
-                isActive);
-
-            dbContext.Locations.Add(location);
-            await dbContext.SaveChangesAsync();
-
-            return location.Id;
-        });
-    }
-
-    private async Task<DepId> AddDepartamentToBase(
-        DepId depId,
-        DepName depName,
-        DepIdentifier depIdentifier,
-        Departament? parent,
-        IEnumerable<DepartmentLocation> locations,
-        IEnumerable<DepartmentPosition> positions,
-        bool isActive)
-    {
-        return await ExecuteInDb(async dbContext =>
-        {
-            Departament departament = Departament.Create(
-                depId,
-                depName,
-                depIdentifier,
-                parent,
-                locations,
-                positions,
-                isActive);
-
-            dbContext.Departaments.Add(departament);
-            await dbContext.SaveChangesAsync();
-
-            return departament.Id;
         });
     }
 
