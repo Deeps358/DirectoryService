@@ -23,6 +23,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("name");
+
+                nb.HasIndex(d => new { d.Value })
+                    .IsUnique();
             });
 
             builder.OwnsOne(d => d.Identifier, ib =>
@@ -31,6 +34,9 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                     .IsRequired()
                     .HasMaxLength(LengthConstants.LENGTH_150)
                     .HasColumnName("identifier");
+
+                ib.HasIndex(d => new { d.Value })
+                    .IsUnique();
             });
 
             builder

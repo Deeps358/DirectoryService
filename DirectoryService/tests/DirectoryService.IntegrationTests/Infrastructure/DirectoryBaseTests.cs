@@ -1,7 +1,7 @@
 ﻿using DirectoryServices.Infrastructure.Postgres;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DirectoryService.IntegrationTests.Common
+namespace DirectoryService.IntegrationTests.Infrastructure
 {
     public class DirectoryBaseTests : IClassFixture<DirectoryTestWebFactory>, IAsyncLifetime
     {

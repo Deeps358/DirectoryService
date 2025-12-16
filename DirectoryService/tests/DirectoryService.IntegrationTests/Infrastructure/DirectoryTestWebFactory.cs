@@ -10,7 +10,7 @@ using Npgsql;
 using Respawn;
 using Testcontainers.PostgreSql;
 
-namespace DirectoryService.IntegrationTests.Common;
+namespace DirectoryService.IntegrationTests.Infrastructure;
 
 // фабрика для запуска веб хоста. DI контейнеры, зависимости, БД и вот это всё же надо как-то запустить
 public class DirectoryTestWebFactory : WebApplicationFactory<Program>, IAsyncLifetime
