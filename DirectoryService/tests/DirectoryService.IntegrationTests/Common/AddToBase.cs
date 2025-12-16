@@ -1,7 +1,9 @@
+using CSharpFunctionalExtensions;
 using DirectoryService.IntegrationTests.Infrastructure;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using DirectoryServices.Entities.ValueObjects.Locations;
+using Shared.ResultPattern;
 
 namespace DirectoryService.IntegrationTests.Common
 {
@@ -12,47 +14,25 @@ namespace DirectoryService.IntegrationTests.Common
         {
         }
 
-        public async Task<LocId> AddLocationToBase(LocName locName, LocAdress locAdress, LocTimezone locTimezone, bool isActive)
+        public async Task<UnitResult<Error>> AddLocationToBase(Location[] locations, CancellationToken cancellationToken)
         {
             return await ExecuteInDb(async dbContext =>
             {
-                Location location = Location.Create(
-                    locName,
-                    locAdress,
-                    locTimezone,
-                    isActive);
-
-                dbContext.Locations.Add(location);
+                await dbContext.Locations.AddRangeAsync(locations, cancellationToken);
                 await dbContext.SaveChangesAsync();
 
-                return location.Id;
+                return UnitResult.Success<Error>();
             });
         }
 
-        public async Task<DepId> AddDepartamentToBase(
-            DepId depId,
-            DepName depName,
-            DepIdentifier depIdentifier,
-            Departament? parent,
-            IEnumerable<DepartmentLocation> locations,
-            IEnumerable<DepartmentPosition> positions,
-            bool isActive)
+        public async Task<UnitResult<Error>> AddDepartamentToBase(Departament[] departaments, CancellationToken cancellationToken)
         {
             return await ExecuteInDb(async dbContext =>
             {
-                Departament departament = Departament.Create(
-                    depId,
-                    depName,
-                    depIdentifier,
-                    parent,
-                    locations,
-                    positions,
-                    isActive);
-
-                dbContext.Departaments.Add(departament);
+                await dbContext.Departaments.AddRangeAsync(departaments, cancellationToken);
                 await dbContext.SaveChangesAsync();
 
-                return departament.Id;
+                return UnitResult.Success<Error>();
             });
         }
     }

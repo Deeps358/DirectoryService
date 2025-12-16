@@ -25,13 +25,15 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_valid_data_should_succeed()
     {
         // arrange
-        LocId locId = await BaseAdding.AddLocationToBase(
+        Location loc = Location.Create(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
         var cancellationToken = CancellationToken.None;
+
+        await BaseAdding.AddLocationToBase([loc], cancellationToken); // локации в базу
 
         // act
         var result = await ExecuteHandler((sut) =>
@@ -41,7 +43,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
                     "dep",
                     "dep",
                     null,
-                    [locId.Value],
+                    [loc.Id.Value],
                     true));
 
             return sut.Handle(command, cancellationToken);
@@ -65,24 +67,28 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_valid_parent_id_should_succeed()
     {
         // arrange
-        LocId locId = await BaseAdding.AddLocationToBase(
+        var cancellationToken = CancellationToken.None;
+
+        Location loc = Location.Create(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
+        await BaseAdding.AddLocationToBase([loc], cancellationToken); // локации в базу
+
         DepId newDepId = DepId.NewDepId();
 
-        DepId depId = await BaseAdding.AddDepartamentToBase(
+        Departament dep = Departament.Create(
             newDepId,
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
             null,
-            [DepartmentLocation.Create(newDepId, locId).Value],
+            [DepartmentLocation.Create(newDepId, loc.Id).Value],
             [],
             true);
 
-        var cancellationToken = CancellationToken.None;
+        await BaseAdding.AddDepartamentToBase([dep], cancellationToken); // депы в базу
 
         // act
         var result = await ExecuteHandler((sut) =>
@@ -91,8 +97,8 @@ public class CreateDepartamentTests : DirectoryBaseTests
                 new CreateDepartamentDto(
                     "Human Resources",
                     "hure",
-                    depId.Value,
-                    [locId.Value],
+                    dep.Id.Value,
+                    [loc.Id.Value],
                     true));
 
             return sut.Handle(command, cancellationToken);
@@ -108,7 +114,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
                 .FirstAsync(d => d.Id == DepId.GetCurrent(result.Value), cancellationToken);
 
             departament.Should().NotBeNull();
-            departament.ParentId.Value.Should().Be(depId.Value);
+            departament.ParentId.Value.Should().Be(dep.Id.Value);
         });
     }
 
@@ -116,24 +122,28 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_duplicate_name_should_fail()
     {
         // arrange
-        LocId locId = await BaseAdding.AddLocationToBase(
+        var cancellationToken = CancellationToken.None;
+
+        Location loc = Location.Create(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
+        await BaseAdding.AddLocationToBase([loc], cancellationToken); // локации в базу
+
         DepId newDepId = DepId.NewDepId();
 
-        DepId depId = await BaseAdding.AddDepartamentToBase(
+        Departament dep = Departament.Create(
             newDepId,
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
             null,
-            [DepartmentLocation.Create(newDepId, locId).Value],
+            [DepartmentLocation.Create(newDepId, loc.Id).Value],
             [],
             true);
 
-        var cancellationToken = CancellationToken.None;
+        await BaseAdding.AddDepartamentToBase([dep], cancellationToken); // депы в базу
 
         // act
         var result = await ExecuteHandler((sut) =>
@@ -143,7 +153,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
                     "Director",
                     "direc",
                     null,
-                    [locId.Value],
+                    [loc.Id.Value],
                     true));
 
             return sut.Handle(command, cancellationToken);
@@ -161,24 +171,28 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_duplicate_identifier_should_fail()
     {
         // arrange
-        LocId locId = await BaseAdding.AddLocationToBase(
+        var cancellationToken = CancellationToken.None;
+
+        Location loc = Location.Create(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
+        await BaseAdding.AddLocationToBase([loc], cancellationToken); // локации в базу
+
         DepId newDepId = DepId.NewDepId();
 
-        DepId depId = await BaseAdding.AddDepartamentToBase(
+        Departament dep = Departament.Create(
             newDepId,
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
             null,
-            [DepartmentLocation.Create(newDepId, locId).Value],
+            [DepartmentLocation.Create(newDepId, loc.Id).Value],
             [],
             true);
 
-        var cancellationToken = CancellationToken.None;
+        await BaseAdding.AddDepartamentToBase([dep], cancellationToken); // депы в базу
 
         // act
         var result = await ExecuteHandler((sut) =>
@@ -188,7 +202,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
                     "Main",
                     "dir",
                     null,
-                    [locId.Value],
+                    [loc.Id.Value],
                     true));
 
             return sut.Handle(command, cancellationToken);
@@ -206,24 +220,28 @@ public class CreateDepartamentTests : DirectoryBaseTests
     public async Task CreateDepartament_with_incorrect_parent_id_should_fail()
     {
         // arrange
-        LocId locId = await BaseAdding.AddLocationToBase(
+        var cancellationToken = CancellationToken.None;
+
+        Location loc = Location.Create(
             LocName.Create("loc1"),
             LocAdress.Create("city1", "street1", 1, "room1"),
             LocTimezone.Create("Europe/Moscow"),
             true);
 
+        await BaseAdding.AddLocationToBase([loc], cancellationToken); // локации в базу
+
         DepId newDepId = DepId.NewDepId();
 
-        DepId depId = await BaseAdding.AddDepartamentToBase(
+        Departament dep = Departament.Create(
             newDepId,
             DepName.Create("Director"),
             DepIdentifier.Create("dir"),
             null,
-            [DepartmentLocation.Create(newDepId, locId).Value],
+            [DepartmentLocation.Create(newDepId, loc.Id).Value],
             [],
             true);
 
-        var cancellationToken = CancellationToken.None;
+        await BaseAdding.AddDepartamentToBase([dep], cancellationToken); // депы в базу
 
         // act
         var result = await ExecuteHandler((sut) =>
@@ -233,7 +251,7 @@ public class CreateDepartamentTests : DirectoryBaseTests
                     "Human Resources",
                     "hure",
                     Guid.NewGuid(),
-                    [locId.Value],
+                    [loc.Id.Value],
                     true));
 
             return sut.Handle(command, cancellationToken);
