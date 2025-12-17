@@ -3,6 +3,7 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.ResultPattern;
 
 namespace DirectoryServices.Infrastructure.Postgres.Repositories
@@ -26,8 +27,27 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             {
                 var addedDepartament = await _dbContext.Departaments.AddAsync(departament, cancellationToken); // сохраняем деп
 
+                await _dbContext.SaveChangesAsync();
+
                 _logger.LogInformation("В базу добавлено новое подразделение с Id = {addedDepartament.Entity.Id.Value}", addedDepartament.Entity.Id.Value);
+
                 return departament.Id.Value;
+            }
+            catch (DbUpdateException dbex)
+            {
+                var pgEx = dbex.InnerException as PostgresException;
+                if (pgEx?.SqlState == "23505")
+                {
+                    _logger.LogInformation(pgEx.ConstraintName, "Сработал индекс уникальности при создании локации в БД");
+                    return pgEx.ConstraintName switch
+                    {
+                        "IX_departaments_name" => Error.Conflict("departament.duplicate.name", ["В системе уже есть подразделение с таким именем!"]),
+                        "IX_departaments_identifier" => Error.Conflict("departament.duplicate.identifier", ["В системе уже есть подразделение с таким идентификатором!"]),
+                        _ => Error.Conflict("departament.duplicate.field", ["В системе уже есть подразделение с таким *ОШИБКА*"])
+                    };
+                }
+
+                return Error.Failure("location.incorrect.DB", ["Ошибка добавления позиции в базу"]);
             }
             catch (Exception ex)
             {

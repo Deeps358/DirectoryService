@@ -45,3 +45,9 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
+namespace DirectoryServices.Web
+{
+    // расширение для доступа Program из тестов
+    public partial class Program;
+}
