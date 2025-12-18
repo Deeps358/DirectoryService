@@ -1,5 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
-using DirectoryServices.Application.Database;
+using DirectoryServices.Application.Locations.Queries.GetLocationById;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +15,13 @@ namespace DirectoryServices.Application
 
             services.Scan(scan => scan.FromAssemblies(assembly)
                 .AddClasses(classes => classes
-                    .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>))) // сам зарегистрирует в DI все хэндлеры (реализации интерфейса)
+                    .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>))) // сам зарегистрирует в DI все command хэндлеры (реализации интерфейса)
+                .AsSelfWithInterfaces()
+                .WithScopedLifetime());
+
+            services.Scan(scan => scan.FromAssemblies(assembly)
+                .AddClasses(classes => classes
+                    .AssignableToAny(typeof(IQueryHandler<,>))) // сам зарегистрирует в DI все query хэндлеры (реализации интерфейса)
                 .AsSelfWithInterfaces()
                 .WithScopedLifetime());
 

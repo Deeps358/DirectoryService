@@ -7,19 +7,19 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Application.Locations.CreateLocation
+namespace DirectoryServices.Application.Locations.Commands.CreateLocation
 {
     public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
     {
         private readonly ITransactionManager _transactionManager;
         private readonly ILocationsRepository _locationsRepository;
-        private readonly IValidator<CreateLocationDto> _validator;
+        private readonly IValidator<CreateLocationRequest> _validator;
         private readonly ILogger<CreateLocationHandler> _logger;
 
         public CreateLocationHandler(
             ITransactionManager transactionManager,
             ILocationsRepository locationsRepository,
-            IValidator<CreateLocationDto> validator,
+            IValidator<CreateLocationRequest> validator,
             ILogger<CreateLocationHandler> logger)
         {
             _transactionManager = transactionManager;
