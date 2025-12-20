@@ -45,7 +45,7 @@ namespace DirectoryServices.Application.Locations.Queries.GetLocations
                 switch(query.Request.SortBy)
                 {
                     case "Name":
-                        locationsQuery = locationsQuery.OrderBy(l => l.Name);
+                        locationsQuery = locationsQuery.OrderBy(l => l.Name.Value);
                         break;
                     case "Creation":
                         locationsQuery = locationsQuery.OrderBy(l => l.CreatedAt);
