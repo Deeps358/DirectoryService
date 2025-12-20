@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DirectoryServices.Application.Locations.Queries.GetLocationById
 {
-    public class GetLocationByIdHandler : IQueryHandler<GetLocationDto, GetLocationByIdQuery>
+    public class GetLocationByIdHandler : IQueryHandler<GetLocationByIdDto, GetLocationByIdQuery>
     {
         private readonly IReadDbContext _readDbContext;
         private readonly ILogger<GetLocationByIdHandler> _logger;
@@ -20,18 +20,20 @@ namespace DirectoryServices.Application.Locations.Queries.GetLocationById
             _logger = logger;
         }
 
-        public async Task<GetLocationDto?> Handle(GetLocationByIdQuery query, CancellationToken cancellationToken)
+        public async Task<GetLocationByIdDto?> Handle(GetLocationByIdQuery query, CancellationToken cancellationToken)
         {
             return await _readDbContext.LocationsRead
                 .Include(l => l.DepartmentLocations)
                 .Where(l => l.Id == LocId.GetCurrent(query.LocationId))
-                .Select(l => new GetLocationDto()
+                .Select(l => new GetLocationByIdDto()
                 {
                     Id = l.Id.Value,
                     Name = l.Name.Value,
                     Adress = new AdressDto(l.Adress.City, l.Adress.Street, l.Adress.Building, l.Adress.Room),
                     Timezone = l.Timezone.Value,
                     IsActive = l.IsActive,
+                    TotalDepartaments = _readDbContext.DepartmentLocationsRead.Count(
+                        dl => dl.LocationId == l.Id),
                     DepartmentLocations = _readDbContext.DepartmentLocationsRead
                         .Where(dl => dl.LocationId == l.Id)
                         .Select(dl => new DepartamentLocationsDto

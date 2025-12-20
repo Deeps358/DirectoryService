@@ -1,6 +1,8 @@
 namespace DirectoryServices.Contracts.Locations
 {
-    public record GetLocationDto
+    public record GetLocationsDto(List<LocationDto> Locations, long TotaCount);
+
+    public record LocationDto
     {
         public Guid Id { get; init; }
 
@@ -11,8 +13,6 @@ namespace DirectoryServices.Contracts.Locations
         public string Timezone { get; init; } = string.Empty;
 
         public bool IsActive { get; init; }
-
-        public List<DepartamentLocationsDto> DepartmentLocations { get; init; } = [];
 
         public DateTime CreatedAt { get; init; }
 

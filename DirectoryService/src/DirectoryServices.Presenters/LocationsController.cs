@@ -1,6 +1,7 @@
 ﻿using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Locations.Commands.CreateLocation;
 using DirectoryServices.Application.Locations.Queries.GetLocationById;
+using DirectoryServices.Application.Locations.Queries.GetLocations;
 using DirectoryServices.Contracts.Locations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -34,13 +35,28 @@ namespace DirectoryServices.Presenters
             return await handler.Handle(command, cancellationToken);
         }
 
-        [HttpGet("{locId}")]
+        [HttpGet]
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<ActionResult<GetLocationDto>> GetById(
+        public async Task<ActionResult<GetLocationByIdDto>> Get(
+            [FromQuery] GetLocationsRequest request,
+            [FromServices] GetLocationsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var locations = await handler.Handle(new GetLocationQuery(request), cancellationToken);
+            return Ok(locations);
+        }
+
+        [HttpGet("efcore/{locId}")] // тренировочный
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<GetLocationByIdDto>> GetById(
             [FromRoute] Guid locId,
             [FromServices] GetLocationByIdHandler handler,
             CancellationToken cancellationToken)
@@ -49,13 +65,13 @@ namespace DirectoryServices.Presenters
             return Ok(location);
         }
 
-        [HttpGet("dapper/{locId}")]
+        [HttpGet("dapper/{locId}")] // тренировочный
         [ProducesResponseType<Envelope<Guid>>(200)]
         [ProducesResponseType<Envelope>(400)]
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<ActionResult<GetLocationDto>> GetByIdDapper(
+        public async Task<ActionResult<GetLocationByIdDto>> GetByIdDapper(
             [FromRoute] Guid locId,
             [FromServices] GetLocationByIdHandlerDapper handler,
             CancellationToken cancellationToken)

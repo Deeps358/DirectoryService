@@ -8,7 +8,7 @@ using DirectoryServices.Contracts.Locations;
 namespace DirectoryServices.Application.Locations.Queries.GetLocationById
 {
 
-    public class GetLocationByIdHandlerDapper : IQueryHandler<GetLocationDto, GetLocationByIdQuery>
+    public class GetLocationByIdHandlerDapper : IQueryHandler<GetLocationByIdDto, GetLocationByIdQuery>
     {
         private readonly IDbConnectionFactory _connectionFactory;
 
@@ -17,13 +17,13 @@ namespace DirectoryServices.Application.Locations.Queries.GetLocationById
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<GetLocationDto?> Handle(GetLocationByIdQuery query, CancellationToken cancellationToken)
+        public async Task<GetLocationByIdDto?> Handle(GetLocationByIdQuery query, CancellationToken cancellationToken)
         {
-            GetLocationDto? locationDto = null;
+            GetLocationByIdDto? locationDto = null;
 
             var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
-            await connection.QueryAsync<GetLocationDto, string, DepartamentLocationsDto, GetLocationDto>(
+            await connection.QueryAsync<GetLocationByIdDto, string, DepartamentLocationsDto, GetLocationByIdDto>(
                 """
                 SELECT  l.id,
                         l.name,
