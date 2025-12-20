@@ -39,6 +39,14 @@ namespace DirectoryServices.Infrastructure.Postgres
 
         public DbSet<DepartmentPosition> DepartmentPositions => Set<DepartmentPosition>();
 
+        public IQueryable<Departament> DepartamentsRead => Set<Departament>().AsNoTracking();
+
         public IQueryable<Location> LocationsRead => Set<Location>().AsNoTracking();
+
+        public IQueryable<Position> PositionsRead => Set<Position>().AsNoTracking();
+
+        public IQueryable<DepartmentLocation> DepartmentLocationsRead => Set<DepartmentLocation>().AsNoTracking();
+
+        public IQueryable<DepartmentPosition> DepartmentPositionsRead => Set<DepartmentPosition>().AsNoTracking();
     }
 }

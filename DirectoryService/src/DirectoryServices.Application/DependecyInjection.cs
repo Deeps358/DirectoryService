@@ -15,13 +15,7 @@ namespace DirectoryServices.Application
 
             services.Scan(scan => scan.FromAssemblies(assembly)
                 .AddClasses(classes => classes
-                    .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>))) // сам зарегистрирует в DI все command хэндлеры (реализации интерфейса)
-                .AsSelfWithInterfaces()
-                .WithScopedLifetime());
-
-            services.Scan(scan => scan.FromAssemblies(assembly)
-                .AddClasses(classes => classes
-                    .AssignableToAny(typeof(IQueryHandler<,>))) // сам зарегистрирует в DI все query хэндлеры (реализации интерфейса)
+                    .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>), typeof(IQueryHandler<,>))) // сам зарегистрирует в DI все command и query хэндлеры (реализации интерфейса)
                 .AsSelfWithInterfaces()
                 .WithScopedLifetime());
 

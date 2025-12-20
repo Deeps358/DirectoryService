@@ -1,5 +1,7 @@
+using Dapper;
 using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
+using DirectoryServices.Contracts;
 using DirectoryServices.Contracts.Locations;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using Microsoft.EntityFrameworkCore;
@@ -20,29 +22,29 @@ namespace DirectoryServices.Application.Locations.Queries.GetLocationById
 
         public async Task<GetLocationDto?> Handle(GetLocationByIdQuery query, CancellationToken cancellationToken)
         {
-            var location = await _readDbContext.LocationsRead
+            return await _readDbContext.LocationsRead
                 .Include(l => l.DepartmentLocations)
-                .FirstOrDefaultAsync(l => l.Id == LocId.GetCurrent(query.LocationId), cancellationToken);
-
-            if(location is null)
-            {
-                return null;
-            }
-
-            return new GetLocationDto()
-            {
-                Id = location.Id.Value,
-                Name = location.Name.Value,
-                City = location.Adress.City,
-                Street = location.Adress.Street,
-                Building = location.Adress.Building,
-                Room = location.Adress.Room,
-                Timezone = location.Timezone.Value,
-                IsActive = location.IsActive,
-                DepartmentLocations = location.DepartmentLocations.Select(dl => dl.DepartamentId.Value).ToArray(),
-                CreatedAt = location.CreatedAt,
-                UpdatedAt = location.UpdatedAt,
-            };
+                .Where(l => l.Id == LocId.GetCurrent(query.LocationId))
+                .Select(l => new GetLocationDto()
+                {
+                    Id = l.Id.Value,
+                    Name = l.Name.Value,
+                    Adress = new AdressDto(l.Adress.City, l.Adress.Street, l.Adress.Building, l.Adress.Room),
+                    Timezone = l.Timezone.Value,
+                    IsActive = l.IsActive,
+                    DepartmentLocations = _readDbContext.DepartmentLocationsRead
+                        .Where(dl => dl.LocationId == l.Id)
+                        .Select(dl => new DepartamentLocationsDto
+                        {
+                            DepartamentId = dl.DepartamentId.Value,
+                            LocationId = dl.LocationId.Value,
+                            CreatedAt = dl.CreatedAt,
+                            UpdatedAt = dl.UpdatedAt,
+                        }).ToList(),
+                    CreatedAt = l.CreatedAt,
+                    UpdatedAt = l.UpdatedAt,
+                })
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

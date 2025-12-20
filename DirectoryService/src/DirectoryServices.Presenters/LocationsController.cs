@@ -48,5 +48,20 @@ namespace DirectoryServices.Presenters
             var location = await handler.Handle(new GetLocationByIdQuery(locId), cancellationToken);
             return Ok(location);
         }
+
+        [HttpGet("dapper/{locId}")]
+        [ProducesResponseType<Envelope<Guid>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<GetLocationDto>> GetByIdDapper(
+            [FromRoute] Guid locId,
+            [FromServices] GetLocationByIdHandlerDapper handler,
+            CancellationToken cancellationToken)
+        {
+            var location = await handler.Handle(new GetLocationByIdQuery(locId), cancellationToken);
+            return Ok(location);
+        }
     }
 }
