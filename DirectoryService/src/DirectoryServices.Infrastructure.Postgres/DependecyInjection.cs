@@ -16,9 +16,14 @@ namespace DirectoryServices.Infrastructure.Postgres
             services.AddScoped<DirectoryServiceDbContext>(_ =>
                 new DirectoryServiceDbContext(configuration.GetConnectionString("DirectoryServiceDevDb")!));
 
+            services.AddScoped<IReadDbContext, DirectoryServiceDbContext>(_ =>
+                new DirectoryServiceDbContext(configuration.GetConnectionString("DirectoryServiceDevDb")!));
+
             services.AddScoped<ILocationsRepository, LocationsRepository>();
             services.AddScoped<IDepartamentsRepository, DepartamentsRepository>();
             services.AddScoped<IPositionsRepository, PositionsRepository>();
+            services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
             services.AddScoped<ITransactionManager, TransactionManager>();
 

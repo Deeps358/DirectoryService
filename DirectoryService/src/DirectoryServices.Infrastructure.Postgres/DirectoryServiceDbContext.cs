@@ -1,10 +1,11 @@
-﻿using DirectoryServices.Entities;
+﻿using DirectoryServices.Application.Database;
+using DirectoryServices.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace DirectoryServices.Infrastructure.Postgres
 {
-    public class DirectoryServiceDbContext : DbContext
+    public class DirectoryServiceDbContext : DbContext, IReadDbContext
     {
         private readonly string _connectionString;
 
@@ -37,5 +38,15 @@ namespace DirectoryServices.Infrastructure.Postgres
         public DbSet<DepartmentLocation> DepartmentLocations => Set<DepartmentLocation>();
 
         public DbSet<DepartmentPosition> DepartmentPositions => Set<DepartmentPosition>();
+
+        public IQueryable<Departament> DepartamentsRead => Set<Departament>().AsNoTracking();
+
+        public IQueryable<Location> LocationsRead => Set<Location>().AsNoTracking();
+
+        public IQueryable<Position> PositionsRead => Set<Position>().AsNoTracking();
+
+        public IQueryable<DepartmentLocation> DepartmentLocationsRead => Set<DepartmentLocation>().AsNoTracking();
+
+        public IQueryable<DepartmentPosition> DepartmentPositionsRead => Set<DepartmentPosition>().AsNoTracking();
     }
 }

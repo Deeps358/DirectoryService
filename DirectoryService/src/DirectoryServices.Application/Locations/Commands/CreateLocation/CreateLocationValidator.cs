@@ -1,9 +1,9 @@
 ﻿using DirectoryServices.Contracts.Locations;
 using FluentValidation;
 
-namespace DirectoryServices.Application.Locations.CreateLocation
+namespace DirectoryServices.Application.Locations.Commands.CreateLocation
 {
-    public class CreateLocationValidator : AbstractValidator<CreateLocationDto>
+    public class CreateLocationValidator : AbstractValidator<CreateLocationRequest>
     {
         public CreateLocationValidator()
         {
