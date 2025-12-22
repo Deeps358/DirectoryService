@@ -1,7 +1,7 @@
 using DirectoryServices.Contracts.Departaments;
 using FluentValidation;
 
-namespace DirectoryServices.Application.Departaments.ChangeParent
+namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
 {
     public class ChangeParentValidator : AbstractValidator<ChangeParentDto>
     {

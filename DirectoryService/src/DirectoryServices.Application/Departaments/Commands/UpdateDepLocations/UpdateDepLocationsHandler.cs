@@ -9,7 +9,7 @@ using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Application.Departaments.UpdateDepLocations
+namespace DirectoryServices.Application.Departaments.Commands.UpdateDepLocations
 {
     public class UpdateDepLocationsHandler : ICommandHandler<Guid, UpdateDepLocationsCommand>
     {

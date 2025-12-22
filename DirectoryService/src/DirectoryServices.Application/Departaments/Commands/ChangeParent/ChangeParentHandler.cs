@@ -5,7 +5,7 @@ using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Application.Departaments.ChangeParent
+namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
 {
     public class ChangeParentHandler : ICommandHandler<int, ChangeParentCommand>
     {

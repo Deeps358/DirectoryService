@@ -1,5 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
-using DirectoryServices.Application.Positions.CreatePosition;
+using DirectoryServices.Application.Positions.Commands.CreatePosition;
 using DirectoryServices.Contracts.Positions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,6 @@
 ﻿using DirectoryService.IntegrationTests.Common;
 using DirectoryService.IntegrationTests.Infrastructure;
-using DirectoryServices.Application.Departaments.CreateDepartament;
+using DirectoryServices.Application.Departaments.Commands.CreateDepartament;
 using DirectoryServices.Contracts.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
