@@ -1,7 +1,7 @@
 using DirectoryServices.Contracts.Departaments;
 using FluentValidation;
 
-namespace DirectoryServices.Application.Departaments.UpdateDepLocations
+namespace DirectoryServices.Application.Departaments.Commands.UpdateDepLocations
 {
     public class UpdateDepLocationsValidator : AbstractValidator<UpdateDepLocationsDto>
     {

@@ -9,7 +9,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
-namespace DirectoryServices.Application.Departaments.CreateDepartament
+namespace DirectoryServices.Application.Departaments.Commands.CreateDepartament
 {
     public class CreateDepartamentHandler : ICommandHandler<Guid, CreateDepartamentCommand>
     {

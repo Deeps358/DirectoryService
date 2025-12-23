@@ -2,7 +2,7 @@
 using DirectoryServices.Entities;
 using FluentValidation;
 
-namespace DirectoryServices.Application.Positions.CreatePosition
+namespace DirectoryServices.Application.Positions.Commands.CreatePosition
 {
     public class CreatePositionValidator : AbstractValidator<CreatePositionDto>
     {

@@ -1,7 +1,8 @@
 ﻿using DirectoryServices.Application.Abstractions;
-using DirectoryServices.Application.Departaments.ChangeParent;
-using DirectoryServices.Application.Departaments.CreateDepartament;
-using DirectoryServices.Application.Departaments.UpdateDepLocations;
+using DirectoryServices.Application.Departaments.Commands.ChangeParent;
+using DirectoryServices.Application.Departaments.Commands.CreateDepartament;
+using DirectoryServices.Application.Departaments.Commands.UpdateDepLocations;
+using DirectoryServices.Application.Departaments.Queries.GetTopFiveByPositions;
 using DirectoryServices.Contracts.Departaments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -65,6 +66,20 @@ namespace DirectoryServices.Presenters
         {
             var command = new ChangeParentCommand(departmentId, updateDepLocationsDto);
             return await handler.Handle(command, cancellationToken);
+        }
+
+        [HttpGet("top-positions")]
+        [ProducesResponseType<Envelope<GetTopFiveByPositionsDto>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<GetTopFiveByPositionsDto>> GetTopFive(
+            [FromServices] GetTopFiveByPositionsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var deps = await handler.Handle(new GetTopFiveByPositionsQuery(), cancellationToken);
+            return Ok(deps);
         }
     }
 }
