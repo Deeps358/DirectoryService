@@ -3,6 +3,7 @@ using DirectoryServices.Application.Departaments.Commands.ChangeParent;
 using DirectoryServices.Application.Departaments.Commands.CreateDepartament;
 using DirectoryServices.Application.Departaments.Commands.UpdateDepLocations;
 using DirectoryServices.Application.Departaments.Queries.GetRoots;
+using DirectoryServices.Application.Departaments.Queries.GetRoots.GetChildrensById;
 using DirectoryServices.Application.Departaments.Queries.GetTopFiveByPositions;
 using DirectoryServices.Contracts.Departaments;
 using Microsoft.AspNetCore.Mvc;
@@ -95,6 +96,22 @@ namespace DirectoryServices.Presenters
             CancellationToken cancellationToken)
         {
             var deps = await handler.Handle(new GetRootsWithChildrensQuery(request), cancellationToken);
+            return Ok(deps);
+        }
+
+        [HttpGet("{parentId}/childrens")]
+        [ProducesResponseType<Envelope<GetTopFiveByPositionsDto>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<DepartamentDto[]>> GetChildrensById(
+            [FromRoute] Guid parentId,
+            [FromQuery] GetChildrensByIdRequest request,
+            [FromServices] GetChildrensByIdHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var deps = await handler.Handle(new GetChildrensByIdQuery(request, parentId), cancellationToken);
             return Ok(deps);
         }
     }
