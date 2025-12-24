@@ -3,5 +3,5 @@ using DirectoryServices.Contracts.Departaments;
 
 namespace DirectoryServices.Application.Departaments.Queries.GetRoots
 {
-    public record GetRootsQuery(GetRootsRequest Request) : IQuery;
+    public record GetRootsWithChildrensQuery(GetRootsWithChildrensRequest Request) : IQuery;
 }

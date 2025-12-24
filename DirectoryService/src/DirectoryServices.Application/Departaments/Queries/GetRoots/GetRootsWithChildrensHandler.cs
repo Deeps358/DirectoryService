@@ -2,23 +2,22 @@ using Dapper;
 using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Contracts.Departaments;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
 namespace DirectoryServices.Application.Departaments.Queries.GetRoots
 {
-    public class GetRootsHandler : IQueryHandler<GetRootsDto, GetRootsQuery>
+    public class GetRootsWithChildrensHandler : IQueryHandler<GetRootsWithChildrensDto, GetRootsWithChildrensQuery>
     {
         private readonly IDbConnectionFactory _connectionFactory;
-        private readonly ILogger<GetRootsHandler> _logger;
+        private readonly ILogger<GetRootsWithChildrensHandler> _logger;
 
-        public GetRootsHandler(IDbConnectionFactory connectionFactory, ILogger<GetRootsHandler> logger)
+        public GetRootsWithChildrensHandler(IDbConnectionFactory connectionFactory, ILogger<GetRootsWithChildrensHandler> logger)
         {
             _connectionFactory = connectionFactory;
             _logger = logger;
         }
 
-        public async Task<GetRootsDto?> Handle(GetRootsQuery query, CancellationToken cancellationToken)
+        public async Task<GetRootsWithChildrensDto?> Handle(GetRootsWithChildrensQuery query, CancellationToken cancellationToken)
         {
             var sql = """
             WITH roots AS (SELECT d.id, d."name", d.identifier, d.parent_id, d."path" , d."depth", d.is_active, d.created_at, d.updated_at  
@@ -58,7 +57,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetRoots
 
             int rootsCount = depsWithChildrens.Count(d => d.Depth == 0);
 
-            return new GetRootsDto(depsWithChildrens, rootsCount);
+            return new GetRootsWithChildrensDto(depsWithChildrens, rootsCount);
         }
     }
 }

@@ -89,12 +89,12 @@ namespace DirectoryServices.Presenters
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<ActionResult<GetRootsDto>> GetRoots(
-            [FromQuery] GetRootsRequest request,
-            [FromServices] GetRootsHandler handler,
+        public async Task<ActionResult<GetRootsWithChildrensDto>> GetRootsWithChildrens(
+            [FromQuery] GetRootsWithChildrensRequest request,
+            [FromServices] GetRootsWithChildrensHandler handler,
             CancellationToken cancellationToken)
         {
-            var deps = await handler.Handle(new GetRootsQuery(request), cancellationToken);
+            var deps = await handler.Handle(new GetRootsWithChildrensQuery(request), cancellationToken);
             return Ok(deps);
         }
     }
