@@ -2,6 +2,7 @@
 using DirectoryServices.Application.Departaments.Commands.ChangeParent;
 using DirectoryServices.Application.Departaments.Commands.CreateDepartament;
 using DirectoryServices.Application.Departaments.Commands.UpdateDepLocations;
+using DirectoryServices.Application.Departaments.Queries.GetRoots;
 using DirectoryServices.Application.Departaments.Queries.GetTopFiveByPositions;
 using DirectoryServices.Contracts.Departaments;
 using Microsoft.AspNetCore.Mvc;
@@ -79,6 +80,21 @@ namespace DirectoryServices.Presenters
             CancellationToken cancellationToken)
         {
             var deps = await handler.Handle(new GetTopFiveByPositionsQuery(), cancellationToken);
+            return Ok(deps);
+        }
+
+        [HttpGet("roots")]
+        [ProducesResponseType<Envelope<GetTopFiveByPositionsDto>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<GetRootsDto>> GetRoots(
+            [FromQuery] GetRootsRequest request,
+            [FromServices] GetRootsHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var deps = await handler.Handle(new GetRootsQuery(request), cancellationToken);
             return Ok(deps);
         }
     }

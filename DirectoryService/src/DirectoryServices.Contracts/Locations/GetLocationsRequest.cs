@@ -1,5 +1,6 @@
 namespace DirectoryServices.Contracts.Locations
 {
+    public record GetManyLocsRequest(GetLocationsRequest r);
     public record GetLocationsRequest(
         Guid[]? DepartamentIds,
         string? Search,
