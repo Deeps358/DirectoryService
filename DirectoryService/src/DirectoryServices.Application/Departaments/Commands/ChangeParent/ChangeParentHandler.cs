@@ -102,12 +102,12 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
             string curParentPath =
                 index == -1
                 ? string.Empty
-                : child.Path.Value.Remove(index, countToRemove); // получу так чтоб не делать ещё запрос в БД на родителя
+                : child.Path.Value.Remove(index, countToRemove); // получу так чтоб не делать ещё запрос в БД на путь родителя
 
             Result<int> affectedRowsResult = await _departamentsRepository.MoveDepWithChildernsAsync(
-                child.Path,
-                DepPath.GetCurrent(curParentPath),
-                parent?.Path,
+                child.Path, // полный путь переносимого
+                DepPath.GetCurrent(curParentPath), // путь текущего родителя
+                parent?.Path, // путь нового родителя
                 command.NewParent.ParentId.HasValue ? DepId.GetCurrent(command.NewParent.ParentId.Value) : null,
                 cancellationToken);
 

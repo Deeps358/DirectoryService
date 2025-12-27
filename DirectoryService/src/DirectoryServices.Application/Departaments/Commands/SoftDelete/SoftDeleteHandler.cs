@@ -1,6 +1,7 @@
 using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Entities;
+using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -41,8 +42,10 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
                 return getDepResult.Error;
             }
 
+            Departament dep = getDepResult.Value;
+
             // заблокирую ещё всех детей депа чтоб их не трогали
-            CSharpFunctionalExtensions.UnitResult<Error> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(getDepResult.Value.Path, cancellationToken);
+            CSharpFunctionalExtensions.UnitResult<Error> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(dep.Path, cancellationToken);
             if(getChildrensResult.IsFailure)
             {
                 transactionScope.Rollback();
@@ -50,6 +53,32 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
             }
 
             // теперь надо поменять Path депа и часть всех детей на [DELETED]
+            string deleteMark = "__DELETED__";
+            var softDeleteResult = await _departamentsRepository.SoftDeleteWithChildrensAsync(
+                dep.Path,
+                DepPath.GetCurrent(dep.Path.Value + deleteMark),
+                cancellationToken);
+
+            if(softDeleteResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return softDeleteResult.Error;
+            }
+
+            CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+            if(saveResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return saveResult.Error;
+            }
+
+            var commitedResult = transactionScope.Commit();
+            if (commitedResult.IsFailure)
+            {
+                return commitedResult.Error;
+            }
+
+            _logger.LogInformation("Произошёл soft Delete подразделения с id = {command.DepId}", command.DepId);
 
             return command.DepId;
         }

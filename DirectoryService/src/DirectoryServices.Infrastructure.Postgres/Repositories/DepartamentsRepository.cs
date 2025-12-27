@@ -151,16 +151,16 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<Result<int>> MoveDepWithChildernsAsync(DepPath depPath, DepPath curParentPath, DepPath? newPath, DepId? parentId, CancellationToken cancellationToken)
+        public async Task<Result<int>> MoveDepWithChildernsAsync(DepPath depPath, DepPath curParentPath, DepPath? newParentPath, DepId? parentId, CancellationToken cancellationToken)
         {
             try
             {
                 FormattableString sql = $"""
                 UPDATE departaments
                 SET path = 
-                        {newPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree)),
+                        {newParentPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree)),
                     depth = 
-                        nlevel({newPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree))) - 1,
+                        nlevel({newParentPath?.Value ?? string.Empty}::ltree || subpath(path, nlevel({curParentPath.Value}::ltree))) - 1,
                     parent_id = 
                         CASE
                             WHEN path = {depPath.Value}::ltree
@@ -181,15 +181,31 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> SoftDeleteDepartament(Guid depId, CancellationToken cancellationToken)
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> SoftDeleteWithChildrensAsync(DepPath oldPath, DepPath deletedPath, CancellationToken cancellationToken)
         {
             try
             {
+                FormattableString sql = $"""
+                UPDATE departaments
+                SET path = 
+                    CASE
+                        WHEN path = {oldPath.Value}::ltree
+                        THEN {deletedPath.Value}::ltree
+                        ELSE {deletedPath.Value}::ltree || subpath(path, nlevel({oldPath.Value}::ltree))
+                    END,
+                    is_active = false
+                WHERE path <@ {oldPath.Value}::ltree;
+                """;
+
+                await _dbContext.Database.ExecuteSqlAsync(sql);
+
+                _logger.LogInformation("Мягкое удаление депа с путём = {oldPath.Value}", oldPath.Value);
+
                 return CSharpFunctionalExtensions.UnitResult.Success<Error>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при мягком удалении подразделений в БД");
+                _logger.LogError(ex, "Ошибка при мягком удалении подразделения с путём {oldPath.Value} в БД", oldPath.Value);
 
                 return Error.Failure("departament.incorrect.softdelete", ["Ошибка при мягком удалении подразделений в базе"]);
             }

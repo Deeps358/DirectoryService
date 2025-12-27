@@ -122,13 +122,12 @@ namespace DirectoryServices.Presenters
         [ProducesResponseType<Envelope>(404)]
         [ProducesResponseType<Envelope>(409)]
         [ProducesResponseType<Envelope>(500)]
-        public async Task<ActionResult<Guid>> SoftDelete(
+        public async Task<EndpointResult<Guid>> SoftDelete(
             [FromRoute] Guid depId,
             [FromServices] SoftDeleteHandler handler,
             CancellationToken cancellationToken)
         {
-            var deletedDep = await handler.Handle(new SoftDeleteCommand(depId), cancellationToken);
-            return Ok(deletedDep);
+            return await handler.Handle(new SoftDeleteCommand(depId), cancellationToken);
         }
     }
 }
