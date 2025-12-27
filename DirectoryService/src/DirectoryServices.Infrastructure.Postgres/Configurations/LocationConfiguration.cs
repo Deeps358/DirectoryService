@@ -74,6 +74,10 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                 .IsRequired()
                 .HasColumnName("updated_at");
 
+            builder.Property(l => l.DeletedAt)
+                .IsRequired()
+                .HasColumnName("deleted_at");
+
             builder.HasMany(l => l.DepartmentLocations)
                 .WithOne()
                 .HasForeignKey(l => l.LocationId);
