@@ -180,5 +180,19 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 return Error.Failure("departament.DB.move", ["Ошибка в базе при перемещении подразделений"]);
             }
         }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> SoftDeleteDepartament(Guid depId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при мягком удалении подразделений в БД");
+
+                return Error.Failure("departament.incorrect.softdelete", ["Ошибка при мягком удалении подразделений в базе"]);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Departaments.Commands.ChangeParent;
 using DirectoryServices.Application.Departaments.Commands.CreateDepartament;
+using DirectoryServices.Application.Departaments.Commands.SoftDelete;
 using DirectoryServices.Application.Departaments.Commands.UpdateDepLocations;
 using DirectoryServices.Application.Departaments.Queries.GetRoots;
 using DirectoryServices.Application.Departaments.Queries.GetRoots.GetChildrensById;
@@ -113,6 +114,21 @@ namespace DirectoryServices.Presenters
         {
             var deps = await handler.Handle(new GetChildrensByIdQuery(request, parentId), cancellationToken);
             return Ok(deps);
+        }
+
+        [HttpDelete("{depId}")]
+        [ProducesResponseType<Envelope<GetTopFiveByPositionsDto>>(200)]
+        [ProducesResponseType<Envelope>(400)]
+        [ProducesResponseType<Envelope>(404)]
+        [ProducesResponseType<Envelope>(409)]
+        [ProducesResponseType<Envelope>(500)]
+        public async Task<ActionResult<Guid>> SoftDelete(
+            [FromRoute] Guid depId,
+            [FromServices] SoftDeleteHandler handler,
+            CancellationToken cancellationToken)
+        {
+            var deletedDep = await handler.Handle(new SoftDeleteCommand(depId), cancellationToken);
+            return Ok(deletedDep);
         }
     }
 }
