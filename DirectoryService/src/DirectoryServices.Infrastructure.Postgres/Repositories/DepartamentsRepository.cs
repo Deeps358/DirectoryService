@@ -221,5 +221,77 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 return Error.Failure("departament.incorrect.softdelete", ["Ошибка при мягком удалении подразделений в базе"]);
             }
         }
+
+        public async Task<Result<int>> DeactivateLocationsWithDepId(Guid depId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                FormattableString sql = $"""
+                UPDATE locations l
+                SET 
+                is_active = false,
+                deleted_at = {DateTime.UtcNow}
+                WHERE l.id IN (
+                    SELECT dl1.location_id
+                    FROM departament_locations dl1
+                    WHERE dl1.departament_id = {depId}
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM departament_locations dl2
+                        WHERE dl2.location_id = dl1.location_id
+                        AND dl2.departament_id != {depId}
+                    )
+                )
+                """;
+
+                var locsCount = await _dbContext.Database.ExecuteSqlAsync(sql);
+
+                _logger.LogInformation("{locsCount} локации стали неактивными после SoftDelete депа с id = {depId}", locsCount, depId);
+
+                return locsCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка деактивации локаций при мягком удалении подразделения с id = {depId} в БД", depId);
+
+                return Error.Failure("departament.incorrect.softdelete.locations", ["Ошибка деактивации локаций при мягком удалении подразделения в базе"]);
+            }
+        }
+
+        public async Task<Result<int>> DeactivatePositionsWithDepId(Guid depId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                FormattableString sql = $"""
+                UPDATE positions p
+                SET 
+                is_active = false,
+                deleted_at = {DateTime.UtcNow}
+                WHERE p.id IN (
+                    SELECT dp1.position_id
+                    FROM departament_positions dp1
+                    WHERE dp1.departament_id = {depId}
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM departament_positions dp2
+                        WHERE dp2.position_id = dp1.position_id
+                        AND dp2.departament_id != {depId}
+                    )
+                )
+                """;
+
+                var posCount = await _dbContext.Database.ExecuteSqlAsync(sql);
+
+                _logger.LogInformation("{posCount} позиций стали неактивными после SoftDelete депа с id = {depId}", posCount, depId);
+
+                return posCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка деактивации позиций при мягком удалении подразделения с id = {depId} в БД", depId);
+
+                return Error.Failure("departament.incorrect.softdelete.positions", ["Ошибка деактивации позиций при мягком удалении подразделения в базе"]);
+            }
+        }
     }
 }

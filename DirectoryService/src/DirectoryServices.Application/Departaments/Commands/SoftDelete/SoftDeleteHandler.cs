@@ -7,7 +7,7 @@ using Shared.ResultPattern;
 
 namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
 {
-    public class SoftDeleteHandler : ICommandHandler<Guid, SoftDeleteCommand>
+    public class SoftDeleteHandler : ICommandHandler<string, SoftDeleteCommand>
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
@@ -23,7 +23,7 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> Handle(SoftDeleteCommand command, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(SoftDeleteCommand command, CancellationToken cancellationToken)
         {
             // открываем транзакцию
             Result<ITransactionScope> transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken); // открытие транзакции
@@ -65,7 +65,21 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
                 return softDeleteResult.Error;
             }
 
-            //Осталось проверить связи с локациями и позициями
+            // Проверить связи с локациями. Если кроме этого депа ничего в локации нет - сделаем неактивными
+            var softDeletedLocsResult = await _departamentsRepository.DeactivateLocationsWithDepId(command.DepId, cancellationToken);
+            if (softDeletedLocsResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return softDeletedLocsResult.Error;
+            }
+
+            // Проверить связи с позициями. Если кроме этого депа ничего в позиции нет - сделаем неактивными
+            var softDeletedPosResult = await _departamentsRepository.DeactivatePositionsWithDepId(command.DepId, cancellationToken);
+            if (softDeletedPosResult.IsFailure)
+            {
+                transactionScope.Rollback();
+                return softDeletedPosResult.Error;
+            }
 
             CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if(saveResult.IsFailure)
@@ -82,7 +96,7 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
 
             _logger.LogInformation("Произошёл soft Delete подразделения с id = {command.DepId}", command.DepId);
 
-            return command.DepId;
+            return $"Удалёно подразделение {dep.Path.Value} c {softDeletedLocsResult.Value} локациями и {softDeletedPosResult.Value} позициями";
         }
     }
 }
