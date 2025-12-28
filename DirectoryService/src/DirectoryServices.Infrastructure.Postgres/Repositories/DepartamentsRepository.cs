@@ -193,7 +193,18 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                         THEN {deletedPath.Value}::ltree
                         ELSE {deletedPath.Value}::ltree || subpath(path, nlevel({oldPath.Value}::ltree))
                     END,
-                    is_active = false
+                    is_active = 
+                    CASE
+                        WHEN path = {oldPath.Value}::ltree
+                        THEN false
+                        ELSE is_active
+                    END,
+                    deleted_at = 
+                    CASE
+                        WHEN path = {oldPath.Value}::ltree
+                        THEN {DateTime.UtcNow}
+                        ELSE deleted_at
+                    END
                 WHERE path <@ {oldPath.Value}::ltree;
                 """;
 

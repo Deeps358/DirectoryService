@@ -65,6 +65,8 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
                 return softDeleteResult.Error;
             }
 
+            //Осталось проверить связи с локациями и позициями
+
             CSharpFunctionalExtensions.UnitResult<Error> saveResult = await _transactionManager.SaveChangesAsync(cancellationToken);
             if(saveResult.IsFailure)
             {
