@@ -53,10 +53,9 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
             }
 
             // теперь надо поменять Path депа и часть всех детей на [DELETED]
-            string deleteMark = "__DELETED__";
             var softDeleteResult = await _departamentsRepository.SoftDeleteWithChildrensAsync(
                 dep.Path,
-                DepPath.GetCurrent(dep.Path.Value + deleteMark),
+                DepPath.GetSoftDeleted(dep.Path.Value),
                 cancellationToken);
 
             if(softDeleteResult.IsFailure)
