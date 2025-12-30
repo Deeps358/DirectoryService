@@ -31,5 +31,11 @@ namespace DirectoryServices.Entities.ValueObjects.Departaments
         {
             return new DepPath(depPath);
         }
+
+        public static Result<DepPath> GetSoftDeleted(string depPath)
+        {
+            string deleteMark = "__DELETED__";
+            return new DepPath(depPath + deleteMark);
+        }
     }
 }

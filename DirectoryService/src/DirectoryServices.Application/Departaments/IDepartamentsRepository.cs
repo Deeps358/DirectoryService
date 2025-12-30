@@ -21,5 +21,11 @@ namespace DirectoryServices.Application.Departaments
         Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken);
 
         Task<Result<int>> MoveDepWithChildernsAsync(DepPath depPath, DepPath curParentPath, DepPath newPath, DepId? parentId, CancellationToken cancellationToken);
+
+        Task<CSharpFunctionalExtensions.UnitResult<Error>> SoftDeleteWithChildrensAsync(DepPath oldPath, DepPath deletedPath, CancellationToken cancellationToken);
+
+        Task<Result<int>> DeactivateLocationsWithDepId(Guid depId, CancellationToken cancellationToken);
+
+        Task<Result<int>> DeactivatePositionsWithDepId(Guid depId, CancellationToken cancellationToken);
     }
 }

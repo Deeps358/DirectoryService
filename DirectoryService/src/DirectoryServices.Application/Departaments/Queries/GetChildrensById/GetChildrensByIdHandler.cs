@@ -4,7 +4,7 @@ using DirectoryServices.Application.Database;
 using DirectoryServices.Contracts.Departaments;
 using Microsoft.Extensions.Logging;
 
-namespace DirectoryServices.Application.Departaments.Queries.GetRoots.GetChildrensById
+namespace DirectoryServices.Application.Departaments.Queries.GetChildrensById
 {
     public class GetChildrensByIdHandler : IQueryHandler<DepartamentDto[], GetChildrensByIdQuery>
     {
