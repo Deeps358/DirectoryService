@@ -80,7 +80,7 @@ namespace DirectoryServices.Infrastructure.Postgres.Configurations
                 .HasColumnName("updated_at");
 
             builder.Property(d => d.DeletedAt)
-                .IsRequired()
+                .IsRequired(false)
                 .HasColumnName("deleted_at");
 
             builder.HasMany(d => d.Locations)
