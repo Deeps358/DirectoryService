@@ -293,5 +293,45 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 return Error.Failure("departament.incorrect.softdelete.positions", ["Ошибка деактивации позиций при мягком удалении подразделения в базе"]);
             }
         }
+
+        public async Task<Departament[]?> GetDepsChildrensById(DepId depId, CancellationToken cancellationToken)
+        {
+            Departament[] childs = await _dbContext.Departaments.Where(d => d.ParentId == depId).ToArrayAsync();
+            if (childs == null)
+            {
+                _logger.LogInformation("Запрос для взятия детей депа с id {depId} ничего не нашёл", depId);
+            }
+
+            return childs;
+        }
+
+        public async Task<Departament[]?> GetDepsForHardDelete(CancellationToken cancellationToken)
+        {
+            Departament[]? oldDeps = await _dbContext.Departaments.Where(d => d.DeletedAt.Value.AddMonths(1) < DateTime.UtcNow).ToArrayAsync();
+
+            if (oldDeps == null)
+            {
+                _logger.LogInformation("Запрос для поиска старых депов ничего не нашёл");
+            }
+
+            return oldDeps;
+        }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> HardDeleteDep(DepId[] ids, CancellationToken cancellationToken)
+        {
+            try
+            {
+                int delDeps = await _dbContext.Departaments.Where(d => ids.Contains(d.Id)).ExecuteDeleteAsync();
+
+                _logger.LogInformation("Полностью удалено {delDeps} подразделений", delDeps);
+
+                return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при жёстком удалении депов из базы");
+                return Error.Failure("departament.incorrect.harddelete.departaments", ["Ошибка жёсткого удаления подразделений в базе"]);
+            }
+        }
     }
 }

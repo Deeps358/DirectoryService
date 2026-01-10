@@ -1,4 +1,5 @@
 ﻿using DirectoryServices.Application.Abstractions;
+using DirectoryServices.Application.Departaments.Services.OldDepsDeletionService;
 using DirectoryServices.Application.Locations.Queries.GetLocationById;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,8 @@ namespace DirectoryServices.Application
                     .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>), typeof(IQueryHandler<,>))) // сам зарегистрирует в DI все command и query хэндлеры (реализации интерфейса)
                 .AsSelfWithInterfaces()
                 .WithScopedLifetime());
+
+            services.AddScoped<IDeletionService, OldDepsDeletionService>();
 
             return services;
         }

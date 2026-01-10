@@ -27,5 +27,11 @@ namespace DirectoryServices.Application.Departaments
         Task<Result<int>> DeactivateLocationsWithDepId(Guid depId, CancellationToken cancellationToken);
 
         Task<Result<int>> DeactivatePositionsWithDepId(Guid depId, CancellationToken cancellationToken);
+
+        Task<Departament[]?> GetDepsChildrensById(DepId depId, CancellationToken cancellationToken);
+
+        Task<Departament[]> GetDepsForHardDelete(CancellationToken cancellationToken);
+
+        Task<CSharpFunctionalExtensions.UnitResult<Error>> HardDeleteDep(DepId[] ids, CancellationToken cancellationToken);
     }
 }
