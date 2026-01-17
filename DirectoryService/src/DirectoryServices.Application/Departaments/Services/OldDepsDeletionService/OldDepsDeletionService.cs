@@ -26,9 +26,8 @@ namespace DirectoryServices.Application.Departaments.Services.OldDepsDeletionSer
         {
             /*
             * 1. Смотрим на дату deleted_at > 1 мес, получаем список (вдруг их больше одного сразу)
-            * далее п. 2-5 в цикле
-            * 2. Лочим по id протухший деп и его детей (метод есть)
-            * 3. Лочим родителя протухшего депа по parent_id (метод есть)
+            * 2. Лочим по path протухшие депы и их детей (передача массивом)
+            * 3. Лочим родителей протухших депов по массиву parent_id (метод есть)
             * 4. Получаем детей депа
             * 5. Каждого ребёнка 1 уровня просто переносим в родителя протухшего депа (тоже цикл, метод есть)
             * 6. Удаляем протухшие депы
@@ -51,51 +50,66 @@ namespace DirectoryServices.Application.Departaments.Services.OldDepsDeletionSer
                 return CSharpFunctionalExtensions.UnitResult.Success<Error>();
             }
 
-            /*п.2-п.6*/
+            // п.2 лок старых депов и их детей
+            DepPath[] paths = depsForDel.Select(d => d.Path).ToArray();
 
-            foreach (Departament dep in depsForDel)
+            var lockDepsWithChildsResult = await _departamentsRepository.LockDepsAndChildsAsync(paths, cancellationToken);
+            if(lockDepsWithChildsResult.IsFailure)
             {
-                // п.2
-                var lockDepWithChildsResult = await _departamentsRepository.GetChildDepsWithLockAsync(dep.Path, cancellationToken);
-                if(lockDepWithChildsResult.IsFailure)
+                transactionScope.Rollback();
+                return lockDepsWithChildsResult.Error;
+            }
+
+            // п.3 Лочим родителей протухших депов по массиву parent_id
+            Departament[] newParents = null;
+
+            DepId?[] parentsIds = depsForDel
+                .Where(d => d.ParentId != null)
+                .Select(d => d.ParentId)
+                .ToArray();
+
+            if(parentsIds != null)
+            {
+                var lockParentsResult = await _departamentsRepository.GetByIdsWithLockAsync(parentsIds, cancellationToken);
+                if(lockParentsResult.IsFailure)
                 {
                     transactionScope.Rollback();
-                    return lockDepWithChildsResult.Error;
+                    return lockParentsResult.Error;
                 }
 
-                Departament newParent = null;
+                newParents = lockParentsResult.Value;
+            }
 
-                // п.3
-                if(dep.ParentId != null)
+            // п.4 Получаем прямых потомков (1 уровня) депов из массива
+            DepId[] ids = depsForDel.Select(d => d.Id).ToArray();
+            Departament[]? depsChilds = await _departamentsRepository.GetDepsChildrensFirstLevelById(ids, cancellationToken);
+
+            // п.5 Каждого ребёнка из списка с его детьми переносим в "деда" удаляемого подразделения
+            foreach (var depChild in depsChilds)
+            {
+                DepPath curDepPath = depChild.Path;
+
+                int curStart = curDepPath.Value.LastIndexOf(".");
+                DepPath parentPath = DepPath.GetCurrent(curDepPath.Value.Remove(curStart));
+
+                int parentStart = parentPath.Value.LastIndexOf(".");
+                DepPath grandParentPath = null;
+                if(parentStart != -1)
                 {
-                    var lockParentResult = await _departamentsRepository.GetByIdWithLockAsync(dep.ParentId.Value, cancellationToken);
-                    if(lockParentResult.IsFailure)
-                    {
-                        transactionScope.Rollback();
-                        return lockParentResult.Error;
-                    }
-
-                    newParent = lockParentResult.Value;
+                    grandParentPath = DepPath.GetCurrent(parentPath.Value.Remove(parentStart));
                 }
 
-                // п.4
-                Departament[]? depsChilds = await _departamentsRepository.GetDepsChildrensById(dep.Id, cancellationToken);
+                Result<int> moveDepsResult = await _departamentsRepository.MoveDepWithChildernsAsync(
+                    curDepPath,
+                    parentPath,
+                    grandParentPath,
+                    newParents?.Where(d => d.Path == grandParentPath).Select(d => d.Id).FirstOrDefault(),
+                    cancellationToken);
 
-                // п.5
-                foreach (var depChild in depsChilds)
+                if (moveDepsResult.IsFailure)
                 {
-                    Result<int> moveDepsResult = await _departamentsRepository.MoveDepWithChildernsAsync(
-                        depChild.Path,
-                        dep.Path,
-                        newParent?.Path,
-                        newParent?.Id,
-                        cancellationToken);
-
-                    if (moveDepsResult.IsFailure)
-                    {
-                        transactionScope.Rollback();
-                        return moveDepsResult.Error;
-                    }
+                    transactionScope.Rollback();
+                    return moveDepsResult.Error;
                 }
             }
 

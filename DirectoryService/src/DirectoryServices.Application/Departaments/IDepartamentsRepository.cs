@@ -10,9 +10,9 @@ namespace DirectoryServices.Application.Departaments
 
         Task<Result<Departament[]>> GetByIdAsync(Guid[] ids, CancellationToken cancellationToken);
 
-        Task<Result<Departament>> GetByIdWithLockAsync(Guid id, CancellationToken cancellationToken);
+        Task<Result<Departament[]>> GetByIdsWithLockAsync(DepId[] ids, CancellationToken cancellationToken);
 
-        Task<CSharpFunctionalExtensions.UnitResult<Error>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken);
+        Task<Result<int>> LockDepsAndChildsAsync(DepPath[] depPaths, CancellationToken cancellationToken);
 
         Task<CSharpFunctionalExtensions.UnitResult<Error>> AddDepLocationsRelationsAsync(
             List<DepartmentLocation> deplocs,
@@ -28,7 +28,7 @@ namespace DirectoryServices.Application.Departaments
 
         Task<Result<int>> DeactivatePositionsWithDepId(Guid depId, CancellationToken cancellationToken);
 
-        Task<Departament[]?> GetDepsChildrensById(DepId depId, CancellationToken cancellationToken);
+        Task<Departament[]?> GetDepsChildrensFirstLevelById(DepId[] depIds, CancellationToken cancellationToken);
 
         Task<Departament[]> GetDepsForHardDelete(CancellationToken cancellationToken);
 
