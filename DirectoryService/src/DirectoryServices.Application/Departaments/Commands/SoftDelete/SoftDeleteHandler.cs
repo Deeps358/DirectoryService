@@ -35,17 +35,17 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
             using ITransactionScope transactionScope = transactionScopeResult.Value;
 
             // сначала проверить что id верный и залочить его
-            Result<Departament> getDepResult = await _departamentsRepository.GetByIdWithLockAsync(command.DepId, cancellationToken);
+            Result<Departament[]> getDepResult = await _departamentsRepository.GetByIdsWithLockAsync([DepId.GetCurrent(command.DepId)], cancellationToken);
             if(getDepResult.IsFailure)
             {
                 transactionScope.Rollback();
                 return getDepResult.Error;
             }
 
-            Departament dep = getDepResult.Value;
+            Departament dep = getDepResult.Value[0];
 
             // заблокирую ещё всех детей депа чтоб их не трогали
-            CSharpFunctionalExtensions.UnitResult<Error> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(dep.Path, cancellationToken);
+            Result<int> getChildrensResult = await _departamentsRepository.LockDepsAndChildsAsync([dep.Path], cancellationToken);
             if(getChildrensResult.IsFailure)
             {
                 transactionScope.Rollback();

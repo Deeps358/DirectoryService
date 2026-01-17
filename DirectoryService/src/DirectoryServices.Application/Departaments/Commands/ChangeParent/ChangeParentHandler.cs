@@ -47,7 +47,7 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
             Departament child = null;
 
             // далее проверю ребёнка и родителя 2 запросами с блокировкой, я не знаю в каком порядке БД выдаст мне массив сущностей
-            Result<Departament> childDepResult = await _departamentsRepository.GetByIdWithLockAsync(command.DepId, cancellationToken);
+            Result<Departament[]> childDepResult = await _departamentsRepository.GetByIdsWithLockAsync([DepId.GetCurrent(command.DepId)], cancellationToken);
 
             if (childDepResult.IsFailure)
             {
@@ -55,11 +55,11 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
                 return childDepResult.Error; // тут могут вернуться как ошибка чтения из БД так и просто не найдено
             }
 
-            child = childDepResult.Value;
+            child = childDepResult.Value[0];
 
             /* заблокирую ещё всех детей депа чтоб их не трогали */
 
-            CSharpFunctionalExtensions.UnitResult<Error> getChildrensResult = await _departamentsRepository.GetChildDepsWithLockAsync(child.Path, cancellationToken);
+            Result<int> getChildrensResult = await _departamentsRepository.LockDepsAndChildsAsync([child.Path], cancellationToken);
 
             if(getChildrensResult.IsFailure)
             {
@@ -69,7 +69,7 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
 
             if (command.NewParent.ParentId.HasValue) // родителя может и не быть, не забыть
             {
-                Result<Departament> parentDepResult = await _departamentsRepository.GetByIdWithLockAsync(command.NewParent.ParentId.Value, cancellationToken);
+                Result<Departament[]> parentDepResult = await _departamentsRepository.GetByIdsWithLockAsync([DepId.GetCurrent(command.NewParent.ParentId.Value)], cancellationToken);
 
                 if (parentDepResult.IsFailure)
                 {
@@ -77,7 +77,7 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
                     return parentDepResult.Error; // тут могут вернуться как ошибка чтения из БД так и просто не найдено
                 }
 
-                parent = parentDepResult.Value;
+                parent = parentDepResult.Value[0];
             }
 
             /* и ещё проверка что родителем указан не один из дочерних элементов ребёнка */
