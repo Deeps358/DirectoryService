@@ -1,4 +1,7 @@
-﻿using DirectoryServices.Application.Departaments;
+﻿using Dapper;
+using DirectoryServices.Application.Database;
+using DirectoryServices.Application.Departaments;
+using DirectoryServices.Contracts.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +14,16 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
     public class DepartamentsRepository : IDepartamentsRepository
     {
         private readonly DirectoryServiceDbContext _dbContext;
+        private readonly IDbConnectionFactory _connectionFactory;
         private readonly ILogger<DepartamentsRepository> _logger;
 
         public DepartamentsRepository(
             DirectoryServiceDbContext dbContext,
+            IDbConnectionFactory connectionFactory,
             ILogger<DepartamentsRepository> logger)
         {
             _dbContext = dbContext;
+            _connectionFactory = connectionFactory;
             _logger = logger;
         }
 
@@ -97,19 +103,32 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             }
         }
 
-        public async Task<Result<Departament>> GetByIdWithLockAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Result<Departament[]>> GetByIdsWithLockAsync(DepId[] ids, CancellationToken cancellationToken)
         {
-            Departament? dep = await _dbContext.Departaments
-                .FromSql($"SELECT * FROM departaments WHERE id = {id} AND is_active FOR UPDATE")
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (dep == null)
+            try
             {
-                _logger.LogInformation("Департамент с id_with_lock = {id} не найден!", id);
-                return Error.NotFound("departament.not_found.id_with_lock", [$"Департамент с id = {id} не найден!"]);
-            }
+                FormattableString sql = $"""
+                    SELECT *
+                    FROM departaments d
+                    WHERE d.id = ANY({ids.Select(i => i.Value).ToArray()}::uuid[]) FOR UPDATE
+                    """;
 
-            return dep;
+                Departament[] lockedDeps = await _dbContext.Departaments.FromSql(sql).ToArrayAsync();
+
+                if (lockedDeps == null || lockedDeps.Length != ids.Length)
+                {
+                    _logger.LogInformation("Не все депы из массива найдены!");
+                    return Error.NotFound("departament.not_found.ids_with_lock", [$"Внутренняя ошибка БД, попробуйте снова"]);
+                }
+
+                return lockedDeps;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при блокировке массива депов");
+
+                return Error.Failure("departament.DB.ids_with_lock", ["Ошибка при блокировке массива депов"]);
+            }
         }
 
         public async Task<CSharpFunctionalExtensions.UnitResult<Error>> DeleteLocationsByDepAsync(DepId depId, CancellationToken cancellationToken)
@@ -129,25 +148,33 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
             return CSharpFunctionalExtensions.UnitResult.Success<Error>();
         }
 
-        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> GetChildDepsWithLockAsync(DepPath depPath, CancellationToken cancellationToken)
+        public async Task<Result<int>> LockDepsAndChildsAsync(DepPath[] depPaths, CancellationToken cancellationToken)
         {
             try
             {
                 FormattableString sql = $"""
-                SELECT * FROM departaments WHERE path <@ {depPath.Value}::ltree ORDER BY depth FOR UPDATE 
+                SELECT *
+                FROM departaments d
+                WHERE d.path <@ ANY({depPaths.Select(dp => dp.Value).ToArray()}::ltree[]) FOR UPDATE 
                 """;
 
-                Departament[] childDeps = await _dbContext.Departaments.FromSql(sql).ToArrayAsync(cancellationToken);
+                var lockedDeps = await _dbContext.Departaments.FromSql(sql).ToArrayAsync();
 
-                _logger.LogInformation("Получены дочерние подразделения с путём = {depPath.Value}", depPath.Value);
+                if (lockedDeps == null)
+                {
+                    _logger.LogError("Ошибка при блокировке депов с детьми, их 0");
+                    return Error.Failure("departament.DB.childrens.zero", ["Ошибка при блокировке депов с детьми"]);
+                }
 
-                return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+                _logger.LogInformation("Выполнена блокировка {lockedDeps.Length} подразделений", lockedDeps.Length);
+
+                return lockedDeps.Length;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при получении дочерних депов с путём = {depPath.Value}", depPath.Value);
+                _logger.LogError(ex, "Ошибка при блокировке депов с детьми");
 
-                return Error.Failure("departament.DB.childrens", ["Ошибка при получении дочерних депов из базы"]);
+                return Error.Failure("departament.DB.childrens", ["Ошибка при блокировке депов с детьми"]);
             }
         }
 
@@ -291,6 +318,46 @@ namespace DirectoryServices.Infrastructure.Postgres.Repositories
                 _logger.LogError(ex, "Ошибка деактивации позиций при мягком удалении подразделения с id = {depId} в БД", depId);
 
                 return Error.Failure("departament.incorrect.softdelete.positions", ["Ошибка деактивации позиций при мягком удалении подразделения в базе"]);
+            }
+        }
+
+        public async Task<Departament[]?> GetDepsChildrensFirstLevelById(DepId[] depIds, CancellationToken cancellationToken)
+        {
+            Departament[]? childs = await _dbContext.Departaments.Where(d => depIds.Contains(d.ParentId)).ToArrayAsync();
+            if (childs == null)
+            {
+                _logger.LogInformation("Запрос для взятия детей депа ничего не нашёл");
+            }
+
+            return childs;
+        }
+
+        public async Task<Departament[]?> GetDepsForHardDelete(CancellationToken cancellationToken)
+        {
+            Departament[]? oldDeps = await _dbContext.Departaments.Where(d => d.DeletedAt.Value.AddMonths(1) < DateTime.UtcNow).ToArrayAsync();
+
+            if (oldDeps == null)
+            {
+                _logger.LogInformation("Запрос для поиска старых депов ничего не нашёл");
+            }
+
+            return oldDeps;
+        }
+
+        public async Task<CSharpFunctionalExtensions.UnitResult<Error>> HardDeleteDep(DepId[] ids, CancellationToken cancellationToken)
+        {
+            try
+            {
+                int delDeps = await _dbContext.Departaments.Where(d => ids.Contains(d.Id)).ExecuteDeleteAsync();
+
+                _logger.LogInformation("Полностью удалено {delDeps} подразделений", delDeps);
+
+                return CSharpFunctionalExtensions.UnitResult.Success<Error>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при жёстком удалении депов из базы");
+                return Error.Failure("departament.incorrect.harddelete.departaments", ["Ошибка жёсткого удаления подразделений в базе"]);
             }
         }
     }

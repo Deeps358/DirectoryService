@@ -1,6 +1,6 @@
 using DirectoryService.IntegrationTests.Common;
 using DirectoryService.IntegrationTests.Infrastructure;
-using DirectoryServices.Application.Departaments.UpdateDepLocations;
+using DirectoryServices.Application.Departaments.Commands.UpdateDepLocations;
 using DirectoryServices.Contracts.Departaments;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;

@@ -4,6 +4,7 @@ using DirectoryServices.Application.Locations;
 using DirectoryServices.Application.Positions;
 using DirectoryServices.Infrastructure.Postgres.Database;
 using DirectoryServices.Infrastructure.Postgres.Repositories;
+using DirectoryServices.Infrastructure.Postgres.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +27,7 @@ namespace DirectoryServices.Infrastructure.Postgres
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
             services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddHostedService<OldDepsDeletionInitiolizerService>();
 
             return services;
         }

@@ -44,7 +44,7 @@ namespace DirectoryServices.Entities
 
         public DateTime UpdatedAt { get; private set; }
 
-        public DateTime DeletedAt { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
 
         public static Result<Location> Create(
             LocName name,
