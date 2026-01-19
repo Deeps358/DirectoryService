@@ -23,5 +23,17 @@
         - 5341:5341
         - 8081:80
 
+    directory_service:
+        container_name: directory_service
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "5188:5188"
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Docker
+            - ASPNETCORE_URLS=http://+:5188
+        restart: always
+
 volumes:
     postgres-data:

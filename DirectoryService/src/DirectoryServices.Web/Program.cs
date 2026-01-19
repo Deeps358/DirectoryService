@@ -31,7 +31,7 @@ app.UseSerilogRequestLogging();
 
 app.UseExceptionMiddleware();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Docker")
 {
     app.MapOpenApi();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "swagger test"));
