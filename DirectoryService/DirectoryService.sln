@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectoryServices.Contracts", "src\DirectoryServices.Contracts\DirectoryServices.Contracts.csproj", "{03F1AEBC-1927-7685-FA43-080E6D6D0AF7}"
