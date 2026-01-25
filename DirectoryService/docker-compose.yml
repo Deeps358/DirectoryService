@@ -29,8 +29,6 @@
       ports:
         - "6379:6379"
       restart: always
-      volumes:
-        - /dev/null:/data
 
     directory_service:
         container_name: directory_service

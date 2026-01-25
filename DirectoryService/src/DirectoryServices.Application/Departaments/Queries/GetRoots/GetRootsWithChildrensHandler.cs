@@ -34,7 +34,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetRoots
             GetRootsWithChildrensQuery query,
             CancellationToken cancellationToken)
         {
-            string rootsWithChildsFilter = $"roots_size_{query.Request.Size}_page_{query.Request.Page}_prefetch_{query.Request.Prefetch}";
+            string rootsWithChildsFilter = $"{CacheConstants.DEPARTMENT_ROOTS_KEY}{query.Request.Size}_page_{query.Request.Page}_prefetch_{query.Request.Prefetch}";
 
             List<DepartamentDto> rootsWithChildsCache = await _hybridCache.GetOrCreateAsync<List<DepartamentDto>>(
                 key: rootsWithChildsFilter,
@@ -78,9 +78,10 @@ namespace DirectoryServices.Application.Departaments.Queries.GetRoots
 
                     return depsWithChildrens;
                 },
+                tags: [ CacheConstants.DEPARTAMENTS_COMMON_KEY, CacheConstants.DEPARTMENT_ROOTS_KEY ],
                 cancellationToken: cancellationToken);
 
-            string roots_count = "roots_count";
+            string roots_count = CacheConstants.DEPARTMENT_ROOTS_COUNT_KEY;
 
             int rootsCountCache = await _hybridCache.GetOrCreateAsync<int>(
                 key: roots_count,
@@ -96,6 +97,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetRoots
 
                     return rootsCountResponce;
                 },
+                tags: new List<string> { CacheConstants.DEPARTAMENTS_COMMON_KEY, CacheConstants.DEPARTMENT_ROOTS_COUNT_KEY },
                 cancellationToken: cancellationToken);
 
             return new GetRootsWithChildrensDto(rootsWithChildsCache, rootsCountCache);

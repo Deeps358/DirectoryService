@@ -25,15 +25,15 @@ namespace DirectoryServices.Application.Departaments.Queries.GetChildrensById
 
         public async Task<DepartamentDto[]?> Handle(GetChildrensByIdQuery query, CancellationToken cancellationToken)
         {
-            var childrens = GetDepWithChildrensFromCache(query, cancellationToken);
+            var childrens = GetDepChildrensFromCache(query, cancellationToken);
             return await childrens;
         }
 
-        private async Task<DepartamentDto[]> GetDepWithChildrensFromCache(
+        private async Task<DepartamentDto[]> GetDepChildrensFromCache(
             GetChildrensByIdQuery query,
             CancellationToken cancellationToken)
         {
-            string requestFilter = $"depid_{query.ParentId}_size_{query.Request.Size}_page_{query.Request.Page}";
+            string requestFilter = $"{CacheConstants.DEPARTMENT_CHILDS_KEY}{query.ParentId}_size_{query.Request.Size}_page_{query.Request.Page}";
 
             var depsCache = await _hybridCache.GetOrCreateAsync<DepartamentDto[]>(
                 key: requestFilter,
@@ -52,8 +52,6 @@ namespace DirectoryServices.Application.Departaments.Queries.GetChildrensById
 
                     var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
-                    ValueTask.FromResult<DepartamentDto[]>(null);
-
                     DepartamentDto[] depsChildrensById = (await connection.QueryAsync<DepartamentDto>(
                     sql,
                     param: new
@@ -65,6 +63,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetChildrensById
 
                     return depsChildrensById;
                 },
+                tags: [CacheConstants.DEPARTAMENTS_COMMON_KEY, CacheConstants.DEPARTMENT_CHILDS_KEY],
                 cancellationToken: cancellationToken);
 
             return depsCache;

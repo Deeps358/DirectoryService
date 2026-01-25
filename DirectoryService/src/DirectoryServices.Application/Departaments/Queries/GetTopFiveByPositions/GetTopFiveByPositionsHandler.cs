@@ -33,7 +33,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetTopFiveByPositio
             GetTopFiveByPositionsQuery query,
             CancellationToken cancellationToken)
         {
-            string topFiveDepsKey = "topfivedeps";
+            string topFiveDepsKey = CacheConstants.DEPARTMENT_TOP_FIVE_KEY;
 
             GetTopFiveByPositionsDto[] topFiveDepsCache = await _hybridCache.GetOrCreateAsync<GetTopFiveByPositionsDto[]>(
                 key: topFiveDepsKey,
@@ -53,6 +53,7 @@ namespace DirectoryServices.Application.Departaments.Queries.GetTopFiveByPositio
 
                     return topFiveDepsResponce;
                 },
+                tags: [CacheConstants.DEPARTAMENTS_COMMON_KEY, CacheConstants.DEPARTMENT_TOP_FIVE_KEY],
                 cancellationToken: cancellationToken);
 
             return topFiveDepsCache;

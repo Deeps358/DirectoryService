@@ -1,9 +1,11 @@
-using DirectoryServices.Application.Abstractions;
+﻿using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
 {
@@ -11,15 +13,18 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
+        private readonly HybridCache _hybridCache;
         private readonly ILogger<ChangeParentHandler> _logger;
 
         public ChangeParentHandler(
             ITransactionManager transactionManager,
             IDepartamentsRepository departamentsRepository,
+            HybridCache hybridCache,
             ILogger<ChangeParentHandler> logger)
         {
             _transactionManager = transactionManager;
             _departamentsRepository = departamentsRepository;
+            _hybridCache = hybridCache;
             _logger = logger;
         }
 
@@ -128,6 +133,17 @@ namespace DirectoryServices.Application.Departaments.Commands.ChangeParent
             if (commitedResult.IsFailure)
             {
                 return commitedResult.Error;
+            }
+
+            if(!command.NewParent.ParentId.HasValue)
+            {
+                await _hybridCache.RemoveByTagAsync(CacheConstants.DEPARTAMENTS_COMMON_KEY, cancellationToken);
+                _logger.LogInformation("Удалены все кэши всех подразделений");
+            }
+            else
+            {
+                await _hybridCache.RemoveByTagAsync(CacheConstants.DEPARTMENT_CHILDS_KEY, cancellationToken);
+                _logger.LogInformation("Удалены кэши детей подразделений");
             }
 
             _logger.LogInformation("У подразделения с id {child.Id.Value} изменился родитель. Всего изменён путь у {affectedRows} подразделений", child.Id.Value, affectedRowsResult);
