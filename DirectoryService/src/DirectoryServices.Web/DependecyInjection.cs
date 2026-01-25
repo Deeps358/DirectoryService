@@ -6,10 +6,10 @@ namespace DirectoryServices.Web
 {
     public static class DependecyInjection
     {
-        public static IServiceCollection AddProgramDependencies(this IServiceCollection services)
+        public static IServiceCollection AddProgramDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddWebDependencies();
-            services.AddApplication();
+            services.AddApplication(configuration);
 
             return services;
         }
