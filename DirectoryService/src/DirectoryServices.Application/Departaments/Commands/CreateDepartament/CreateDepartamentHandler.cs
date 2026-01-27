@@ -6,6 +6,7 @@ using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
 using DirectoryServices.Entities.ValueObjects.Locations;
 using FluentValidation;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -17,6 +18,7 @@ namespace DirectoryServices.Application.Departaments.Commands.CreateDepartament
         private readonly IDepartamentsRepository _departamentsRepository;
         private readonly ILocationsRepository _locationsRepository;
         private readonly IValidator<CreateDepartamentDto> _validator;
+        private readonly HybridCache _hybridCache;
         private readonly ILogger<CreateDepartamentHandler> _logger;
 
         public CreateDepartamentHandler(
@@ -24,12 +26,14 @@ namespace DirectoryServices.Application.Departaments.Commands.CreateDepartament
             IDepartamentsRepository departamentsRepository,
             ILocationsRepository locationsRepository,
             IValidator<CreateDepartamentDto> validator,
+            HybridCache hybridCache,
             ILogger<CreateDepartamentHandler> logger)
         {
             _transactionManager = transactionManager;
             _departamentsRepository = departamentsRepository;
             _locationsRepository = locationsRepository;
             _validator = validator;
+            _hybridCache = hybridCache;
             _logger = logger;
         }
 
@@ -129,6 +133,19 @@ namespace DirectoryServices.Application.Departaments.Commands.CreateDepartament
             {
                 transactionScope.Rollback();
                 return commitedResult.Error;
+            }
+
+            if (!command.Departament.ParentId.HasValue)
+            {
+                await _hybridCache.RemoveByTagAsync(CacheConstants.DEPARTAMENTS_COMMON_KEY, cancellationToken);
+                _logger.LogInformation("Удалены все кэши всех подразделений");
+            }
+            else
+            {
+                await _hybridCache.RemoveByTagAsync(
+                    [CacheConstants.DEPARTMENT_CHILDS_KEY, CacheConstants.DEPARTMENT_TOP_FIVE_KEY],
+                    cancellationToken);
+                _logger.LogInformation("Удалены кэши детей подразделений и кэш топ-5 подразделений");
             }
 
             _logger.LogInformation("Создано подразделение с id {newDep.Value}", newDep.Value);

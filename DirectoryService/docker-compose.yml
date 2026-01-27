@@ -23,6 +23,13 @@
         - 5341:5341
         - 8081:80
 
+    redis:
+      container_name: redis
+      image: redis:alpine
+      ports:
+        - "6379:6379"
+      restart: always
+
     directory_service:
         container_name: directory_service
         build:

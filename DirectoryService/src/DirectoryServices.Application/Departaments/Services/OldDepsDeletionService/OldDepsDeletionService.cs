@@ -1,6 +1,7 @@
-using DirectoryServices.Application.Database;
+﻿using DirectoryServices.Application.Database;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -10,15 +11,18 @@ namespace DirectoryServices.Application.Departaments.Services.OldDepsDeletionSer
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
+        private readonly HybridCache _hybridCache;
         private readonly ILogger<OldDepsDeletionService> _logger;
 
         public OldDepsDeletionService(
             ITransactionManager transactionManager,
             IDepartamentsRepository departamentsRepository,
+            HybridCache hybridCache,
             ILogger<OldDepsDeletionService> logger)
         {
             _transactionManager = transactionManager;
             _departamentsRepository = departamentsRepository;
+            _hybridCache = hybridCache;
             _logger = logger;
         }
 
@@ -137,6 +141,9 @@ namespace DirectoryServices.Application.Departaments.Services.OldDepsDeletionSer
                 transactionScope.Rollback();
                 return commitedResult.Error;
             }
+
+            await _hybridCache.RemoveByTagAsync(CacheConstants.DEPARTAMENTS_COMMON_KEY, cancellationToken);
+            _logger.LogInformation("Удалены все кэши всех подразделений");
 
             _logger.LogInformation("Сервис по полному удалению депов отработал успешно");
 

@@ -1,7 +1,8 @@
-using DirectoryServices.Application.Abstractions;
+﻿using DirectoryServices.Application.Abstractions;
 using DirectoryServices.Application.Database;
 using DirectoryServices.Entities;
 using DirectoryServices.Entities.ValueObjects.Departaments;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Shared.ResultPattern;
 
@@ -11,15 +12,18 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
     {
         private readonly ITransactionManager _transactionManager;
         private readonly IDepartamentsRepository _departamentsRepository;
+        private readonly HybridCache _hybridCache;
         private readonly ILogger<SoftDeleteHandler> _logger;
 
         public SoftDeleteHandler(
                 ITransactionManager transactionManager,
                 IDepartamentsRepository departamentsRepository,
+                HybridCache hybridCache,
                 ILogger<SoftDeleteHandler> logger)
         {
             _transactionManager = transactionManager;
             _departamentsRepository = departamentsRepository;
+            _hybridCache = hybridCache;
             _logger = logger;
         }
 
@@ -92,6 +96,12 @@ namespace DirectoryServices.Application.Departaments.Commands.SoftDelete
             {
                 return commitedResult.Error;
             }
+
+            await _hybridCache.RemoveByTagAsync(
+                [CacheConstants.DEPARTMENT_CHILDS_KEY, CacheConstants.DEPARTMENT_ROOTS_KEY],
+                cancellationToken);
+
+            _logger.LogInformation("Удалены кэши детей подразделений и кэши корней");
 
             _logger.LogInformation("Произошёл soft Delete подразделения с id = {command.DepId}", command.DepId);
 
