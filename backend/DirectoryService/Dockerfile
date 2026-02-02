@@ -1,14 +1,13 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ["Directory.Build.props", "."]
 COPY [".editorconfig", "."]
 
-COPY ["./", "./"]
+COPY ["DirectoryService/", "DirectoryService/"]
 
-RUN dotnet restore "./src/DirectoryServices.Web/DirectoryServices.Web.csproj"
+RUN dotnet restore "DirectoryService/src/DirectoryServices.Web/DirectoryServices.Web.csproj"
 
-WORKDIR "/src/src/DirectoryServices.Web"
+WORKDIR "/src/DirectoryService/src/DirectoryServices.Web"
 
 RUN dotnet publish "./DirectoryServices.Web.csproj" \ 
     -c Release \ 
